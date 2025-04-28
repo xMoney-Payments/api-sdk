@@ -1,4 +1,4 @@
 export class OrderOutputDto {
-  base64Checksum: string;
-  base64Json: string;
+  checksum: string;
+  payload: string;
 }

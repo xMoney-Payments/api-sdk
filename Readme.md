@@ -10,14 +10,14 @@
 
 #### Get needed params for checkout initialization:
 ```typescript
-import InlineCheckoutApiSdk from "@xmoney/api-sdk";
+import xMoney from "@xmoney/api-sdk";
 
-const inlineCheckout = new InlineCheckoutApiSdk({
+const xMoneyCheckout = new xMoney({
   secretKey: "mySecretKey",
 });
 
-const order = inlineCheckout.initializeCheckout({
-  siteId: 1,
+const order = xMoneyCheckout.initializeCheckout({
+  publicKey: 'pk_test_abc123',
   customer: {
     identifier: "customerIdentifier",
     firstName: "John",
@@ -40,16 +40,16 @@ const order = inlineCheckout.initializeCheckout({
 
 #### How to decrypt order webhook payload:
 ```typescript
-import InlineCheckoutApiSdk from "@xmoney/api-sdk";
+import xMoney from "@xmoney/api-sdk";
 
-const inlineCheckout = new InlineCheckoutApiSdk({
+const xMoneyCheckout = new xMoney({
   secretKey: "mySecretKey",
 });
 
 const webhookPayload = 'ecryptedPayload'; 
 
 console.log(
-    inlineCheckout.decryptOrderResponse(webhookPayload)
+    xMoneyCheckout.decryptOrderResponse(webhookPayload)
 );
 ```
 

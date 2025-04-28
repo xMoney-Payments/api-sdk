@@ -1,6 +1,6 @@
 import * as crypto from "crypto";
 import { OrderInputDto } from "../typings/dtos/order-input.dto";
-import { OrderOutputDto, XMoneyOrderDecryptResponseDto } from "../typings/dtos";
+import { OrderOutputDto, xMoneyOrder, xMoneyOrderDecryptResponseDto } from "../typings/dtos";
 
 export class OrderService {
   private secretKey: string;
@@ -10,20 +10,36 @@ export class OrderService {
   }
 
   public createOrder(orderInput: OrderInputDto): OrderOutputDto {
-    if (!orderInput.saveCard) {
-      orderInput.saveCard = false;
+    const publicKey = orderInput.publicKey;
+
+    const key = this.extractKeyFromPublicKey(publicKey);
+    if (!key) {
+      throw new Error('Invalid public key format. Expected format: pk_<env>_key');
     }
-    const base64Json = this.getBase64JsonRequest(orderInput);
-    const base64Checksum = this.getBase64Checksum(orderInput);
+
+    const order: xMoneyOrder = {
+      siteId: key,
+      ...orderInput
+    }
+    if (!order.saveCard) {
+      order.saveCard = false;
+    }
+    const base64Json = this.getBase64JsonRequest(order);
+    const base64Checksum = this.getBase64Checksum(order);
     return {
-      base64Json,
-      base64Checksum,
+      payload: base64Json,
+      checksum: base64Checksum,
     };
+  }
+
+  private extractKeyFromPublicKey(publicKey: string): string | null {
+    const match = publicKey.match(/^pk_(test|live)_(.+)$/);
+    return match ? match[2] : null;
   }
 
   public decryptOrderResponse(
     encryptedResponse: string
-  ): XMoneyOrderDecryptResponseDto {
+  ): xMoneyOrderDecryptResponseDto {
     // get the IV and the encrypted data
     const encryptedParts = encryptedResponse.split(",", 2),
       iv = Buffer.from(encryptedParts[0], "base64"),
@@ -37,10 +53,10 @@ export class OrderService {
       ]).toString();
 
     // JSON decode the decrypted data
-    return JSON.parse(decryptedIpnResponse) as XMoneyOrderDecryptResponseDto;
+    return JSON.parse(decryptedIpnResponse) as xMoneyOrderDecryptResponseDto;
   }
 
-  private getBase64JsonRequest(orderData: OrderInputDto): string {
+  private getBase64JsonRequest(orderData: xMoneyOrder): string {
     const jsonText = JSON.stringify(orderData);
 
     return Buffer.alloc(Buffer.byteLength(jsonText), jsonText).toString(
@@ -48,7 +64,7 @@ export class OrderService {
     );
   }
 
-  private getBase64Checksum(orderData: OrderInputDto): string {
+  private getBase64Checksum(orderData: xMoneyOrder): string {
     const hmacSha512 = crypto.createHmac("sha512", this.secretKey);
     hmacSha512.update(JSON.stringify(orderData));
 

@@ -1,7 +1,7 @@
-import { XMoneyResponseCodeEnum } from "../../enums";
+import { xMoneyResponseCodeEnum } from "../../enums";
 
-export class XMoneyApiErrorDto {
-  code: XMoneyResponseCodeEnum;
+export class xMoneyApiErrorDto {
+  code: xMoneyResponseCodeEnum;
   message: string;
   type: string;
 }
