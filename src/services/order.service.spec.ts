@@ -11,15 +11,15 @@ describe('OrderService', () => {
             identifier: 'test-customer',
             firstName: 'John',
             lastName: 'Doe',
-            email: 'john.doe@example.com'
+            email: 'john.doe@example.com',
         },
         order: {
             orderId: 'test-order-123',
             type: 'purchase',
             amount: 100,
             currency: 'EUR',
-            description: 'Test order'
-        }
+            description: 'Test order',
+        },
     };
 
     beforeEach(() => {
@@ -74,7 +74,7 @@ describe('OrderService', () => {
         it('should successfully create order with valid live environment and public key', () => {
             const liveOrderInput = {
                 ...mockOrderInput,
-                publicKey: 'pk_live_xyz789'
+                publicKey: 'pk_live_xyz789',
             };
             const result = service.createOrder(liveOrderInput);
 
@@ -87,7 +87,7 @@ describe('OrderService', () => {
         it('should throw error when public key format is invalid', () => {
             const invalidOrderInput = {
                 ...mockOrderInput,
-                publicKey: 'invalid_key_format'
+                publicKey: 'invalid_key_format',
             };
 
             expect(() => {
@@ -110,7 +110,7 @@ describe('OrderService', () => {
         it('should preserve saveCard value when provided', () => {
             const orderInputWithSaveCard = {
                 ...mockOrderInput,
-                saveCard: true
+                saveCard: true,
             };
 
             const result = service.createOrder(orderInputWithSaveCard);
@@ -121,4 +121,4 @@ describe('OrderService', () => {
             expect(typeof result.checksum).toBe('string');
         });
     });
-}); 
+});

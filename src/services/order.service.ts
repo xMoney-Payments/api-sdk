@@ -19,8 +19,8 @@ export class OrderService {
 
     const order: xMoneyOrder = {
       siteId: key,
-      ...orderInput
-    }
+      ...orderInput,
+    };
     if (!order.saveCard) {
       order.saveCard = false;
     }
@@ -38,7 +38,7 @@ export class OrderService {
   }
 
   public decryptOrderResponse(
-    encryptedResponse: string
+    encryptedResponse: string,
   ): xMoneyOrderDecryptResponseDto {
     // get the IV and the encrypted data
     const encryptedParts = encryptedResponse.split(",", 2),
