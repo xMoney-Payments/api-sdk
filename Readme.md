@@ -13,7 +13,7 @@
 import xMoney from "@xmoney/api-sdk";
 
 const xMoneyCheckout = new xMoney({
-  secretKey: "mySecretKey",
+  secretKey: "sk_test_secretKey",
 });
 
 const order = xMoneyCheckout.initializeCheckout({
@@ -43,7 +43,7 @@ const order = xMoneyCheckout.initializeCheckout({
 import xMoney from "@xmoney/api-sdk";
 
 const xMoneyCheckout = new xMoney({
-  secretKey: "mySecretKey",
+  secretKey: "sk_test_secretKey",
 });
 
 const webhookPayload = 'ecryptedPayload'; 

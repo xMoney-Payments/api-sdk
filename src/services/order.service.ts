@@ -6,7 +6,7 @@ export class OrderService {
   private secretKey: string;
 
   public constructor(secretKey: string) {
-    this.secretKey = secretKey;
+    this.secretKey = this.extractKeyFromSecretKey(secretKey);
   }
 
   public createOrder(orderInput: OrderInputDto): OrderOutputDto {
@@ -35,6 +35,11 @@ export class OrderService {
   private extractKeyFromPublicKey(publicKey: string): string | null {
     const match = publicKey.match(/^pk_(test|live)_(.+)$/);
     return match ? match[2] : null;
+  }
+
+  private extractKeyFromSecretKey(secretKey: string): string {
+    const match = secretKey.match(/^sk_(test|live)_(.+)$/);
+    return match ? match[2] : secretKey;
   }
 
   public decryptOrderResponse(
