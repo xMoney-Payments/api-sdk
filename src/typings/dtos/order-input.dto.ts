@@ -1,5 +1,5 @@
 export class OrderInputDto {
-  siteId: number;
+  publicKey: string;
   cardTransactionMode: "auth" | "authAndCapture" | "credit";
   invoiceEmail?: string;
   saveCard?: boolean;

@@ -1,7 +1,7 @@
-import { XMoneyTransactionStatusEnum } from "../../enums/xmoney-transaction-status.enum";
+import { xMoneyTransactionStatusEnum } from "../../enums/xmoney-transaction-status.enum";
 
-export class XMoneyOrderDecryptResponseDto {
-  transactionStatus: XMoneyTransactionStatusEnum;
+export class xMoneyOrderDecryptResponseDto {
+  transactionStatus: xMoneyTransactionStatusEnum;
   orderId: number;
   externalOrderId: string;
   transactionId: number;

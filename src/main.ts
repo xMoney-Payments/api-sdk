@@ -2,11 +2,11 @@ import {
   InitInputDto,
   OrderInputDto,
   OrderOutputDto,
-  XMoneyOrderDecryptResponseDto,
+  xMoneyOrderDecryptResponseDto,
 } from "./typings/dtos";
 import { OrderService } from "./services/order.service";
 
-export default class InlineCheckoutApiSdk {
+export default class xMoney {
   private orderService: OrderService;
 
   constructor(initParams: InitInputDto) {
@@ -17,7 +17,7 @@ export default class InlineCheckoutApiSdk {
     return this.orderService.createOrder(input);
   }
 
-  public decryptOrderResponse(input: string): XMoneyOrderDecryptResponseDto {
+  public decryptOrderResponse(input: string): xMoneyOrderDecryptResponseDto {
     return this.orderService.decryptOrderResponse(input);
   }
 }

@@ -1,10 +1,10 @@
-import { XMoneyOrderResponseDataRedirectDto } from "./xmoney-order-response-data-redirect.dto";
+import { xMoneyOrderResponseDataRedirectDto } from "./xmoney-order-response-data-redirect.dto";
 
-export class XMoneyOrderResponseDataDto {
+export class xMoneyOrderResponseDataDto {
   orderId: number;
   transactionId: number;
   cardId: number;
   isRedirect?: boolean;
   is3d?: number;
-  redirect?: XMoneyOrderResponseDataRedirectDto;
+  redirect?: xMoneyOrderResponseDataRedirectDto;
 }
