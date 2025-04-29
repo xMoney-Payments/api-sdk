@@ -40,9 +40,6 @@ const order = xMoneyCheckout.initializeCheckout({
 ```
 
 #### Get HTML for hosted checkout (mobile/webview):
-HostedCheckoutRedirectUrl: <br />
-Use `https://secure-stage.twispay.com` for staging environment. <br />
-Use `https://secure.twispay.com` for prod environment
 ```typescript
 import xMoney from "@xmoney/api-sdk";
 

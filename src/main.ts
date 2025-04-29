@@ -12,7 +12,6 @@ export default class xMoney {
   constructor(initParams: InitInputDto) {
     this.orderService = new OrderService(
       initParams.secretKey,
-      initParams.hostedCheckoutRedirectUrl,
     );
   }
 
