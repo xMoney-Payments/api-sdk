@@ -14,7 +14,6 @@ import xMoney from "@xmoney/api-sdk";
 
 const xMoneyCheckout = new xMoney({
   secretKey: "sk_test_secretKey",
-  hostedCheckoutRedirectUrl: "https://secure-stage.twispay.com",
 });
 
 const order = xMoneyCheckout.initializeCheckout({
