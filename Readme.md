@@ -38,6 +38,36 @@ const order = xMoneyCheckout.initializeCheckout({
 });
 ```
 
+#### Get HTML for hosted checkout (mobile/webview):
+```typescript
+import xMoney from "@xmoney/api-sdk";
+
+const xMoneyCheckout = new xMoney({
+  secretKey: "sk_test_secretKey",
+});
+
+const orderHtml = xMoneyCheckout.initializeHostedCheckout({
+  publicKey: 'pk_test_abc123',
+  customer: {
+    identifier: "customerIdentifier",
+    firstName: "John",
+    lastName: "Doe",
+    country: "RO",
+    city: "Bucharest",
+    email: "john.doe@test.com",
+  },
+  order: {
+    orderId: "myUniqueOrderId",
+    description: "Order Description",
+    type: "purchase",
+    amount: 100,
+    currency: "EUR",
+  },
+  cardTransactionMode: "authAndCapture",
+  backUrl: "https://127.0.0.1:8080",
+});
+```
+
 #### How to decrypt order webhook payload:
 ```typescript
 import xMoney from "@xmoney/api-sdk";
