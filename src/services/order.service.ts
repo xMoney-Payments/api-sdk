@@ -4,9 +4,11 @@ import { OrderOutputDto, xMoneyOrder, xMoneyOrderDecryptResponseDto } from "../t
 
 export class OrderService {
   private secretKey: string;
+  private hostedCheckoutRedirectUrl: string | undefined;
 
-  public constructor(secretKey: string) {
+  public constructor(secretKey: string, hostedCheckoutRedirectUrl?: string) {
     this.secretKey = this.extractKeyFromSecretKey(secretKey);
+    this.hostedCheckoutRedirectUrl = hostedCheckoutRedirectUrl;
   }
 
   public createOrder(orderInput: OrderInputDto): OrderOutputDto {
@@ -30,6 +32,26 @@ export class OrderService {
       payload: base64Json,
       checksum: base64Checksum,
     };
+  }
+
+  public createOrderWithHtml(orderInput: OrderInputDto){
+    if(!this.hostedCheckoutRedirectUrl){
+      throw new Error('HostedCheckoutRedirect url missing');
+    }
+
+    const order = this.createOrder(orderInput);
+
+    return `<form id="checkoutForm" name="checkoutForm" 
+    action="${this.hostedCheckoutRedirectUrl}" method="post" accept-charset="UTF-8">
+    <input type="hidden" name="jsonRequest" value="${order.payload}">
+    <input type="hidden" name="checksum" value="${order.checksum}">
+    <input type="submit" style="visibility:hidden">
+    </form>
+    <script type="text/javascript">
+      window.onload=function(){
+        window.setTimeout('document.checkoutForm.submit()', 200)
+      }
+    </script>`;
   }
 
   private extractKeyFromPublicKey(publicKey: string): string | null {
