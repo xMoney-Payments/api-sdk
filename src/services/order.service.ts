@@ -1,39 +1,39 @@
 import * as crypto from 'crypto';
 import { OrderInputDto } from '../typings/dtos/order-input.dto';
-import { OrderOutputDto, xMoneyOrder, xMoneyOrderDecryptResponseDto } from '../typings/dtos';
-import { LIVE_ENV, LIVE_ENV_URL, TEST_ENV, TEST_ENV_URL } from '../typings/constants';
+import {
+  OrderInputSavedCardDto,
+  OrderOutputDto,
+  xMoneyApiErrorDto,
+  xMoneyApiResponseDto,
+  xMoneyOrder,
+  xMoneyOrderDecryptResponseDto,
+  xMoneyOrderResponseDataDto,
+} from '../typings/dtos';
+import { CommonService } from './common.service';
+import { xMoneyApiService } from './xmoney-api.service';
+import { xMoneyResponseCodeEnum } from '../typings/enums';
 
 export class OrderService {
-  private secretKey: string;
-  private secretKeyEnv: string | null;
+  private commonService: CommonService;
+  private apiService: xMoneyApiService;
 
-  private hostedCheckoutRedirectUrl: { [key: string]: string } = {
-    [TEST_ENV]: TEST_ENV_URL,
-    [LIVE_ENV]: LIVE_ENV_URL,
-  };
-
-  public constructor(secretKey: string) {
-    this.secretKey = this.extractKeyFromSecretKey(secretKey);
-    this.secretKeyEnv = this.extractEnvFromSecretKey(secretKey);
+  public constructor(commonService: CommonService) {
+    this.commonService = commonService;
+    this.apiService = new xMoneyApiService(commonService);
   }
 
   public createOrder(orderInput: OrderInputDto): OrderOutputDto {
-    const publicKey = orderInput.publicKey;
-
-    const key = this.extractKeyFromPublicKey(publicKey);
-    if (!key) {
-      throw new Error('Invalid public key format. Expected format: pk_<env>_key');
-    }
+    const publicKey = this.commonService.getPublicKey(orderInput);
 
     const order: xMoneyOrder = {
-      siteId: key,
+      siteId: publicKey,
       ...orderInput,
     };
     if (!order.saveCard) {
       order.saveCard = false;
     }
-    const base64Json = this.getBase64JsonRequest(order);
-    const base64Checksum = this.getBase64Checksum(order);
+    const base64Json = this.commonService.getBase64JsonRequest(order);
+    const base64Checksum = this.commonService.getBase64Checksum(order);
     return {
       payload: base64Json,
       checksum: base64Checksum,
@@ -41,15 +41,7 @@ export class OrderService {
   }
 
   public createOrderWithHtml(orderInput: OrderInputDto) {
-    if (!this.secretKeyEnv) {
-      throw new Error('Cannot detect url based on secret key');
-    }
-
-    const envUrl = this.hostedCheckoutRedirectUrl[this.secretKeyEnv];
-
-    if (!envUrl) {
-      throw new Error('HostedCheckoutRedirect url missing');
-    }
+    const envUrl = this.commonService.getUrl();
 
     const order = this.createOrder(orderInput);
 
@@ -66,28 +58,39 @@ export class OrderService {
     </script>`;
   }
 
-  private extractKeyFromPublicKey(publicKey: string): string | null {
-    const envPattern = `${TEST_ENV}|${LIVE_ENV}`;
-    const regexp = new RegExp(`^pk_(${envPattern})_(.+)$`);
-    const match = publicKey.match(regexp);
-    return match ? match[2] : null;
-  }
+  public async createOrderWithSavedCard(
+    orderInput: OrderInputSavedCardDto,
+    iteration = 0,
+  ): Promise<xMoneyApiResponseDto<xMoneyOrderResponseDataDto | xMoneyApiErrorDto>> {
+    // Allow maximum 2 recursive calls
+    if (iteration === 2) {
+      throw new Error('Maximum iterations limit exceeded for create order')
+    }
 
-  private extractKeyFromSecretKey(secretKey: string): string {
-    const regexp = this.getSecretKeyRegex();
-    const match = secretKey.match(regexp);
-    return match ? match[2] : secretKey;
-  }
+    const order = await this.apiService.createOrder(orderInput);
 
-  private extractEnvFromSecretKey(secretKey: string): string | null {
-    const regexp = this.getSecretKeyRegex();
-    const match = secretKey.match(regexp);
-    return match ? match[1] : null;
-  }
+    if (
+      order.data &&
+      (order.code === xMoneyResponseCodeEnum.Success ||
+        order.code === xMoneyResponseCodeEnum.Created)
+    ) {
+      return order;
+    }
 
-  private getSecretKeyRegex(): RegExp {
-    const envPattern = `${TEST_ENV}|${LIVE_ENV}`;
-    return new RegExp(`^sk_(${envPattern})_(.+)$`);
+    // if error code is soft decline, we can try again
+    if (order.error && order.error.find((e) => e.code === xMoneyResponseCodeEnum.SoftDecline)) {
+      const softDeclineInput = {
+        ...orderInput,
+        transactionOption: JSON.stringify({
+          isSoftDecline: 'yes',
+        }),
+      };
+
+      return await this.createOrderWithSavedCard(softDeclineInput, ++iteration);
+    } else {
+      // if error code is not soft decline, return error
+      return order;
+    }
   }
 
   public decryptOrderResponse(encryptedResponse: string): xMoneyOrderDecryptResponseDto {
@@ -97,7 +100,7 @@ export class OrderService {
       encryptedData = Buffer.from(encryptedParts[1], 'base64');
 
     // decrypt the encrypted data
-    const decipher = crypto.createDecipheriv('aes-256-cbc', this.secretKey, iv),
+    const decipher = crypto.createDecipheriv('aes-256-cbc', this.commonService.getPrivateKey(), iv),
       decryptedIpnResponse = Buffer.concat([
         decipher.update(encryptedData),
         decipher.final(),
@@ -105,18 +108,5 @@ export class OrderService {
 
     // JSON decode the decrypted data
     return JSON.parse(decryptedIpnResponse) as xMoneyOrderDecryptResponseDto;
-  }
-
-  private getBase64JsonRequest(orderData: xMoneyOrder): string {
-    const jsonText = JSON.stringify(orderData);
-
-    return Buffer.alloc(Buffer.byteLength(jsonText), jsonText).toString('base64');
-  }
-
-  private getBase64Checksum(orderData: xMoneyOrder): string {
-    const hmacSha512 = crypto.createHmac('sha512', this.secretKey);
-    hmacSha512.update(JSON.stringify(orderData));
-
-    return hmacSha512.digest('base64');
   }
 }
