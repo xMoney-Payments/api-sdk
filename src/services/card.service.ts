@@ -1,7 +1,6 @@
 import { FiatCurrenciesEnum } from '../typings/enums';
 import {
   ApiResponseDto,
-  InitInputDto,
   OrderOutputDto,
   SaveCardInputDto,
   xMoneyApiErrorDto,
@@ -16,8 +15,9 @@ export class CardService {
   private xMoneyApiService: xMoneyApiService;
   private SAVE_CARD_AMOUNT_EUR = 0.1;
 
-  public constructor(initParams: InitInputDto) {
-    this.commonService = new CommonService(initParams);
+  public constructor(commonService: CommonService) {
+    this.commonService = commonService;
+    this.xMoneyApiService = new xMoneyApiService(this.commonService);
   }
 
   public saveCard(saveCardInput: SaveCardInputDto): OrderOutputDto {

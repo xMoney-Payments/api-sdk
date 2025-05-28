@@ -60,7 +60,7 @@ export class xMoneyApiService {
     return {
       baseURL: this.commonService.getApiBaseUrl(),
       headers: {
-        Authorization: `Bearer ${this.commonService.getApiKey()}`,
+        Authorization: `Bearer ${this.commonService.secretKey}`,
       },
     };
   };
@@ -74,13 +74,13 @@ export class xMoneyApiService {
         ...config,
         ...this.getConfig(),
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('An error occurred while calling Twispay API Route', {
         route: url,
         params: config?.params,
-        error,
+        error: error,
       });
-      return undefined;
+      return error?.response;
     }
   }
 

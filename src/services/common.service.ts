@@ -11,7 +11,6 @@ import {
 
 export class CommonService {
   public secretKey: string;
-  public apiKey: string | undefined;
   private secretKeyEnv: string | null;
 
   public hostedCheckoutRedirectUrl: { [key: string]: string } = {
@@ -27,7 +26,6 @@ export class CommonService {
   public constructor(initParams: InitInputDto) {
     this.secretKey = this.extractKeyFromSecretKey(initParams.secretKey);
     this.secretKeyEnv = this.extractEnvFromSecretKey(initParams.secretKey);
-    this.apiKey = initParams.apiKey;
   }
 
   public getPublicKey(input: OrderInputDto | SaveCardInputDto): string {
@@ -74,14 +72,6 @@ export class CommonService {
     return envUrl;
   }
 
-  public getApiKey(): string {
-    if(!this.apiKey){
-      throw new Error('ApiKey missing');
-    }
-
-    return this.apiKey;
-  }
-
   public getBase64JsonRequest(orderData: xMoneyOrder): string {
     const jsonText = JSON.stringify(orderData);
 
@@ -109,6 +99,9 @@ export class CommonService {
   }
 
   private extractEnvFromSecretKey(secretKey: string): string | null {
+    if(this.secretKeyEnv){
+      return this.secretKeyEnv;
+    }
     const regexp = this.getSecretKeyRegex();
     const match = secretKey.match(regexp);
     return match ? match[1] : null;
