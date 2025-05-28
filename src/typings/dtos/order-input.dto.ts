@@ -3,6 +3,7 @@ export class OrderInputDto {
   cardTransactionMode: "auth" | "authAndCapture" | "credit";
   invoiceEmail?: string;
   saveCard?: boolean;
+  cardId?: number;
   backUrl: string;
   customer: {
     identifier: string;
