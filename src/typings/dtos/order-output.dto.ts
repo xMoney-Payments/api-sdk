@@ -1,4 +1,4 @@
-export class OrderOutputDto {
-  checksum: string;
-  payload: string;
+export interface OrderOutputDto {
+  checksum: string
+  payload: string
 }

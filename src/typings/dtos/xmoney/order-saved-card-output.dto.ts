@@ -1,7 +1,7 @@
-import { xMoneyOrderResponseDataRedirectDto } from "./xmoney-order-response-data-redirect.dto";
-import { xMoneyOrderResponseDataDto } from "./xmoney-order-response-data.dto";
+import type { xMoneyOrderResponseDataRedirectDto } from './xmoney-order-response-data-redirect.dto'
+import type { xMoneyOrderResponseDataDto } from './xmoney-order-response-data.dto'
 
-export class OrderSavedCardOutputDto {
-  isThreeDSecure: boolean;
-  data: xMoneyOrderResponseDataRedirectDto | xMoneyOrderResponseDataDto;
+export interface OrderSavedCardOutputDto {
+  isThreeDSecure: boolean
+  data: xMoneyOrderResponseDataRedirectDto | xMoneyOrderResponseDataDto
 }

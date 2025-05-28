@@ -1,9 +1,9 @@
-import { xMoneyResponseCodeEnum } from "../../enums";
-import { xMoneyApiErrorDto } from "./xmoney-api-error.dto";
+import type { xMoneyResponseCodeEnum } from '../../enums'
+import type { xMoneyApiErrorDto } from './xmoney-api-error.dto'
 
-export class xMoneyApiResponseDto<T> {
-  code: xMoneyResponseCodeEnum;
-  message: string;
-  data?: T;
-  error?: xMoneyApiErrorDto[];
+export interface xMoneyApiResponseDto<T> {
+  code: xMoneyResponseCodeEnum
+  message: string
+  data?: T
+  error?: xMoneyApiErrorDto[]
 }

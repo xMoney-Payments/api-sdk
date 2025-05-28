@@ -1,5 +1,5 @@
-export class xMoneyOrderResponseDataRedirectDto {
-  url: string;
-  formMethod: number;
-  params: Record<string, string>;
+export interface xMoneyOrderResponseDataRedirectDto {
+  url: string
+  formMethod: number
+  params: Record<string, string>
 }

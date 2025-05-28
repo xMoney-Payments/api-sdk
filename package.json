@@ -1,46 +1,61 @@
 {
   "name": "@xmoney/api-sdk",
+  "type": "module",
   "version": "0.1.2",
-  "scripts": {
-    "test": "jest",
-    "build": "tsc",
-    "lint": "eslint \"{src,apps,libs,test}/**/*.ts\"",
-    "lint:fix": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
-    "format": "prettier --write \"src/**/*.{ts,js,json}\"",
-    "format:check": "prettier --check \"src/**/*.{ts,js,json}\""
-  },
-  "main": "lib/main.js",
-  "types": "lib/main.d.ts",
-  "files": [
-    "lib/**/*"
-  ],
+  "packageManager": "pnpm@10.6.2",
+  "description": "xMoney API SDK for Node.js",
+  "author": "xMoney",
+  "license": "MIT",
+  "homepage": "https://www.xmoney.com",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Twispay/api-sdk.git"
   },
+  "bugs": "https://github.com/Twispay/api-sdk/issues",
   "keywords": [
     "xmoney",
     "api-sdk"
   ],
-  "author": "xMoney",
-  "license": "MIT",
-  "devDependencies": {
-    "@eslint/js": "^9.24.0",
-    "@types/jest": "^29.5.14",
-    "@types/node": "^22.15.3",
-    "@types/qs": "^6.9.18",
-    "@typescript-eslint/eslint-plugin": "^8.31.1",
-    "@typescript-eslint/parser": "^8.31.1",
-    "eslint": "^9.24.0",
-    "eslint-config-prettier": "^10.1.2",
-    "jest": "^29.7.0",
-    "prettier": "^3.5.3",
-    "ts-jest": "^29.3.2",
-    "tslib": "^2.8.1",
-    "typescript": "^5.8.3"
+  "sideEffects": false,
+  "exports": {
+    ".": "./dist/index.mjs",
+    "./package.json": "./package.json"
+  },
+  "main": "./dist/index.mjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "unbuild",
+    "dev": "unbuild --stub",
+    "lint": "eslint",
+    "test": "vitest",
+    "typecheck": "tsc --noEmit",
+    "prepare": "simple-git-hooks"
   },
   "dependencies": {
-    "axios": "^1.8.4",
-    "qs": "^6.14.0"
+    "axios": "catalog:",
+    "qs": "catalog:"
+  },
+  "devDependencies": {
+    "@antfu/eslint-config": "catalog:cli",
+    "@types/node": "catalog:types",
+    "@types/qs": "catalog:types",
+    "eslint": "catalog:cli",
+    "lint-staged": "catalog:cli",
+    "simple-git-hooks": "catalog:cli",
+    "typescript": "catalog:cli",
+    "unbuild": "catalog:cli",
+    "vite": "catalog:cli",
+    "vitest": "catalog:testing",
+    "vitest-package-exports": "catalog:testing"
+  },
+  "simple-git-hooks": {
+    "pre-commit": "pnpm i --frozen-lockfile --ignore-scripts --offline && npx lint-staged"
+  },
+  "lint-staged": {
+    "*": "eslint --fix"
   }
 }

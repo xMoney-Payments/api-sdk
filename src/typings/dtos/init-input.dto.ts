@@ -1,3 +1,3 @@
-export class InitInputDto {
-  secretKey: string;
+export interface InitInputDto {
+  secretKey: string
 }
