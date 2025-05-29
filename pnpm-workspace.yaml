@@ -3,9 +3,6 @@ packages:
   - docs
   - packages/*
   - examples/*
-catalog:
-  axios: ^1.8.4
-  qs: ^6.14.0
 catalogs:
   cli:
     '@antfu/eslint-config': ^4.13.2

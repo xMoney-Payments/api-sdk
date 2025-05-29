@@ -1,12 +1,24 @@
 # @xmoney/api-sdk
 
-## Instalaltion
+A modern, type-safe API SDK for the XMoney API. Built with TypeScript-first design principles, featuring explicit error handling, async generators for efficient pagination, and cross-platform support.
 
-`npm install @xmoney/api-sdk`
-<br />
-<br />
+## Installation
 
-## Usage
+```sh
+# npm
+npm install @xmoney/api-sdk
+
+# pnpm
+pnpm add @xmoney/api-sdk
+
+# yarn
+yarn add @xmoney/api-sdk
+
+# bun
+bun add @xmoney/api-sdk
+```
+
+## Quick Start
 
 #### Get needed params for checkout initialization:
 ```typescript
@@ -82,3 +94,21 @@ console.log(
   xMoneyCheckout.decryptOrderResponse(webhookPayload)
 )
 ```
+
+CryptoProvider.ts - abstract class for crypto operations
+NodeCryptoProvider.ts - Node implementation of CryptoProvider
+SubtleCryptoProvider.ts - Browser implementation of CryptoProvider (using SubtleCrypto)
+error.ts - errors
+HttpClient.ts - abstract class for HTTP client operations
+FetchHttpClient.ts - Fetch HTTP client implementation
+NodeHttpClient.ts - Node HTTP client implementation
+types.ts - Common types used in the SDK
+RequestHandler.ts - handles requests and responses
+PlatformFunctions.ts - abstract class for platform-specific functions so that the SDK can work in both Node.js and browser environments
+NodePlatformFunctions.ts - Node.js implementation of PlatformFunctions
+BrowserPlatformFunctions.ts - Browser implementation of PlatformFunctions
+Customers.ts - handles customer-related operations
+Transactions.ts - handles transaction-related operations
+Cards.ts - handles card-related operations
+Orders.ts - handles order-related operations
+XMoney.ts - main class that ties everything together and provides the SDK interface

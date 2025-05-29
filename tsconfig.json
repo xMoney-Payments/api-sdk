@@ -7,8 +7,11 @@
     "resolveJsonModule": true,
     "strict": true,
     "strictNullChecks": true,
+    "declaration": true,
     "noEmit": true,
+    "outDir": "./dist",
     "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
     "verbatimModuleSyntax": true,
     "skipDefaultLibCheck": true,
     "skipLibCheck": true

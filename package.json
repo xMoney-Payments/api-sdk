@@ -14,16 +14,36 @@
   "bugs": "https://github.com/Twispay/api-sdk/issues",
   "keywords": [
     "xmoney",
-    "api-sdk"
+    "api-sdk",
+    "payment"
   ],
   "sideEffects": false,
   "exports": {
-    ".": "./dist/index.mjs",
-    "./package.json": "./package.json"
+    ".": {
+      "browser": "./dist/index.web.mjs",
+      "bun": "./dist/index.web.mjs",
+      "deno": "./dist/index.web.mjs",
+      "edge-light": "./dist/index.web.mjs",
+      "edge-routine": "./dist/index.web.mjs",
+      "netlify": "./dist/index.web.mjs",
+      "react-native": "./dist/index.web.mjs",
+      "wintercg": "./dist/index.web.mjs",
+      "worker": "./dist/index.web.mjs",
+      "workerd": "./dist/index.web.mjs",
+      "node": {
+        "types": "./dist/index.node.d.ts",
+        "import": "./dist/index.node.mjs",
+        "require": "./dist/index.node.cjs"
+      },
+      "types": "./dist/index.web.d.ts",
+      "import": "./dist/index.web.mjs",
+      "require": "./dist/index.web.cjs"
+    }
   },
-  "main": "./dist/index.mjs",
-  "module": "./dist/index.mjs",
-  "types": "./dist/index.d.mts",
+  "main": "./dist/index.node.cjs",
+  "module": "./dist/index.web.mjs",
+  "browser": "./dist/index.web.mjs",
+  "types": "./dist/index.web.d.ts",
   "files": [
     "dist"
   ],
@@ -34,10 +54,6 @@
     "test": "vitest",
     "typecheck": "tsc --noEmit",
     "prepare": "simple-git-hooks"
-  },
-  "dependencies": {
-    "axios": "catalog:",
-    "qs": "catalog:"
   },
   "devDependencies": {
     "@antfu/eslint-config": "catalog:cli",
