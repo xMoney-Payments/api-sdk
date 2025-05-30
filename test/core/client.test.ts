@@ -13,8 +13,8 @@ describe('xMoneyClient', () => {
       ok: true,
       status: 200,
       headers: {},
-      json: vi.fn().mockResolvedValue({ data: 'success' }),
-      text: vi.fn().mockResolvedValue('success'),
+      json: vi.fn().mockResolvedValue({ data: 'test' }),
+      text: vi.fn().mockResolvedValue('test'),
     }
 
     mockHttpClient = {

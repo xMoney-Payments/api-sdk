@@ -43,10 +43,10 @@ describe('fetchHttpClient', () => {
   })
 
   describe('request', () => {
-    const mockHeaders = {
-      'content-type': 'application/json',
-      'x-custom-header': 'value',
-    }
+    const mockHeaders = new Map([
+      ['Content-Type', 'application/json'],
+      ['X-Custom-Header', 'value'],
+    ])
 
     const mockResponse = {
       ok: true,

@@ -76,6 +76,7 @@ describe('xMoneyError', () => {
       expect(error.validationErrors).toEqual({
         email: 'Invalid email format',
         password: 'Password too short',
+        name: 'Name is required',
       })
     })
 
