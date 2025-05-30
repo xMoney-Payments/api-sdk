@@ -1,4 +1,4 @@
-import type { ApiResponse, HttpClient, RequestOptions, XMoneyConfig } from './types'
+import type { ApiResponse, RequestOptions, XMoneyConfig } from './types'
 import { XMoneyClient } from './core/client'
 import { CardsResource, CustomersResource, NotificationsResource, OrdersResource, TransactionsResource } from './resources'
 
@@ -12,13 +12,23 @@ export interface XMoneySDK {
 }
 
 // Internal factory used by all entry points
-// This is typically in factory.ts file
-export function createXMoneyClientWithHttpClient(config: XMoneyConfig | string, httpClient: HttpClient): XMoneySDK {
+export function createXMoneyClientFactory(config: XMoneyConfig | string): XMoneySDK {
   const finalConfig = typeof config === 'string'
     ? { apiKey: config }
     : config
 
-  const client = new XMoneyClient({ ...finalConfig, httpClient })
+  // Extract httpClient and platformProvider from config
+  const httpClient = finalConfig.httpClient
+  const platformProvider = finalConfig.platformProvider
+
+  if (!httpClient) {
+    throw new Error('httpClient is required')
+  }
+  if (!platformProvider) {
+    throw new Error('platformProvider is required')
+  }
+
+  const client = new XMoneyClient({ ...finalConfig, httpClient, platformProvider })
 
   return {
     customers: new CustomersResource(client),

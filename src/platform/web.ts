@@ -1,4 +1,4 @@
-import type { DecipherInterface, HmacInterface, PlatformBuffer, PlatformCrypto } from './types'
+import type { DecipherInterface, HmacInterface, PlatformBuffer, PlatformCrypto, PlatformProvider } from './types'
 
 /**
  * Web implementation using Web Crypto API
@@ -184,4 +184,10 @@ function concatUint8Arrays(arrays: Uint8Array[]): Uint8Array {
     offset += arr.length
   }
   return result
+}
+
+// Export the platform provider
+export const webPlatformProvider: PlatformProvider = {
+  crypto: new WebCrypto(),
+  buffer: new WebBuffer(),
 }

@@ -84,8 +84,8 @@ export interface ListTransactionParams {
   transactionType?: 'deposit' | 'refund' | 'credit' | 'chargeback' | 'representment'
   transactionStatus?: TransactionStatus[]
   dateType?: 'creation' | 'approval' | 'refund' | 'cancellation' | 'charge-back'
-  createdAtFrom?: string
-  createdAtTo?: string
+  createdAtFrom?: Date
+  createdAtTo?: Date
   greaterThanId?: number
   source?: Array<'service-call' | 're-bill' | 're-bill-micro' | 'card-change'>
   ip?: string

@@ -84,8 +84,8 @@ export interface ListOrderParams {
   customerId?: number
   orderType?: 'purchase' | 'recurring'
   orderStatus?: 'start' | 'in-progress' | 'retrying' | 'expiring' | 'complete-ok' | 'complete-failed'
-  createdAtFrom?: string
-  createdAtTo?: string
+  createdAtFrom?: Date
+  createdAtTo?: Date
   reason?: RefundReason
   tag?: string
   page?: number

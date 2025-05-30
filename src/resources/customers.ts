@@ -55,8 +55,8 @@ export interface ListCustomerParams {
   tag?: string
   country?: string
   state?: string
-  createdAtFrom?: string
-  createdAtTo?: string
+  createdAtFrom?: Date
+  createdAtTo?: Date
   page?: number
   perPage?: number
   reverseSorting?: 0 | 1

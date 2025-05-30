@@ -1,4 +1,4 @@
-import type { DecipherInterface, HmacInterface, PlatformBuffer, PlatformCrypto } from './types'
+import type { DecipherInterface, HmacInterface, PlatformBuffer, PlatformCrypto, PlatformProvider } from './types'
 import { Buffer } from 'node:buffer'
 import crypto from 'node:crypto'
 
@@ -50,4 +50,10 @@ export class NodeBuffer implements PlatformBuffer {
   toString(buffer: Uint8Array, encoding: 'base64' | 'utf8'): string {
     return Buffer.from(buffer).toString(encoding)
   }
+}
+
+// Export the platform provider
+export const nodePlatformProvider: PlatformProvider = {
+  crypto: new NodeCrypto(),
+  buffer: new NodeBuffer(),
 }

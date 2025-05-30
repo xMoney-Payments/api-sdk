@@ -1,29 +1,46 @@
-import type { ApiResponse, HttpClient, RequestOptions, XMoneyConfig, XMoneyCore } from '../types'
-import { createDefaultHttpClient } from '../http'
+import type { ApiResponse, HttpClient, PlatformProvider, RequestOptions, XMoneyConfig, XMoneyCore } from '../types'
+import { DateTransformer } from '../utils'
 import { XMoneyError } from './error'
 
 export class XMoneyClient implements XMoneyCore {
   readonly config: Readonly<XMoneyConfig>
   private readonly httpClient: HttpClient
+  private readonly platformProvider: PlatformProvider
 
   constructor(config: XMoneyConfig | string) {
     this.config = typeof config === 'string'
       ? { apiKey: config, host: 'https://api-stage.xmoney.com', timeout: 80000, maxRetries: 3 }
       : { host: 'https://api-stage.xmoney.com', timeout: 80000, maxRetries: 3, ...config }
 
-    // Use provided HTTP client or create default based on environment
-    this.httpClient = this.config.httpClient || createDefaultHttpClient()
+    // HTTP client must be provided
+    if (!this.config.httpClient) {
+      throw new Error('HTTP client is required')
+    }
+    this.httpClient = this.config.httpClient
+
+    // Platform provider must be provided
+    if (!this.config.platformProvider) {
+      throw new Error('Platform provider is required')
+    }
+    this.platformProvider = this.config.platformProvider
   }
 
   async request<T>(options: RequestOptions): Promise<ApiResponse<T>> {
+    // Transform dates in query and body parameters
+    const transformedOptions = {
+      ...options,
+      query: options.query ? DateTransformer.toApi(options.query) : undefined,
+      body: options.body ? DateTransformer.toApi(options.body) : undefined,
+    }
+
     // Build full URL - URL constructor is available in Node.js 10+ and all browsers
     const baseUrl = this.config.host!.endsWith('/') ? this.config.host!.slice(0, -1) : this.config.host!
-    const path = options.path.startsWith('/') ? options.path : `/${options.path}`
+    const path = transformedOptions.path.startsWith('/') ? transformedOptions.path : `/${transformedOptions.path}`
     const url = new URL(baseUrl + path)
 
     // Add query parameters
-    if (options.query) {
-      Object.entries(options.query).forEach(([key, value]) => {
+    if (transformedOptions.query) {
+      Object.entries(transformedOptions.query).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
           if (Array.isArray(value)) {
             value.forEach(v => url.searchParams.append(key, String(v)))
@@ -37,7 +54,7 @@ export class XMoneyClient implements XMoneyCore {
 
     const headers: Record<string, string> = {
       Authorization: `Bearer ${this.config.apiKey}`,
-      ...options.headers,
+      ...transformedOptions.headers,
     }
 
     // Add secure token if provided (for card operations)
@@ -46,10 +63,10 @@ export class XMoneyClient implements XMoneyCore {
     }
 
     let body: string | undefined
-    if (options.body && (options.method === 'POST' || options.method === 'PUT' || options.method === 'PATCH')) {
+    if (transformedOptions.body && (transformedOptions.method === 'POST' || transformedOptions.method === 'PUT' || transformedOptions.method === 'PATCH' || transformedOptions.method === 'DELETE')) {
       // XMoney uses form-encoded data
       headers['Content-Type'] = 'application/x-www-form-urlencoded'
-      body = this.encodeFormData(options.body)
+      body = this.encodeFormData(transformedOptions.body)
     }
 
     let lastError: Error
@@ -58,7 +75,7 @@ export class XMoneyClient implements XMoneyCore {
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
         const response = await this.httpClient.request({
-          method: options.method,
+          method: transformedOptions.method,
           url: url.toString(),
           headers,
           body,

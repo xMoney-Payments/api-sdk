@@ -1,6 +1,5 @@
-import type { BinaryLike, Hmac, KeyObject } from 'node:crypto'
-import type stream from 'node:stream'
 import type { HttpClient, HttpMethod } from './http'
+import type { PlatformProvider } from './platform/types'
 
 export interface XMoneyConfig {
   apiKey: string
@@ -9,6 +8,7 @@ export interface XMoneyConfig {
   timeout?: number
   maxRetries?: number
   httpClient?: HttpClient
+  platformProvider?: PlatformProvider
 }
 
 export interface XMoneyCore {
@@ -48,11 +48,6 @@ export interface Pagination {
   pageCount: number
 }
 
-export interface PlatformAdapter {
-  createHmac: (algorithm: string, key: BinaryLike | KeyObject, options?: stream.TransformOptions) => Hmac
-  base64Encode: (data: string) => string
-  urlEncode: (params: Record<string, any>) => string
-}
-
 export type * from './http'
+export type * from './platform/types'
 export type * from './resources'
