@@ -40,13 +40,27 @@ export interface CheckoutCreateResponse {
   checksum: string
 }
 
+type XMoneyTransactionStatus = 'complete-ok' | 'complete-failed' | 'in-progress' | 'refund-ok'
+
 export interface CheckoutResponse {
+  transactionStatus: XMoneyTransactionStatus
   orderId: number
+  externalOrderId: string
   transactionId: number
-  status: string
+  transactionMethod: string
+  customerId: number
+  identifier: string
   amount: number
   currency: string
-  [key: string]: any
+  customData: { [key: string]: string } | null
+  customFields: { [key: string]: string } | null
+  timestamp: number
+  cardId: number | undefined
+  errors?: {
+    code: number
+    message: string
+    type: string
+  }[]
 }
 
 export class CheckoutResource {
