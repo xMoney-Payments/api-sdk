@@ -110,7 +110,7 @@ describe('transactionsResource', () => {
     it('should capture a transaction with full amount', async () => {
       mockCore.request = vi.fn().mockResolvedValue({})
 
-      await transactionsResource.capture(1001, 10000)
+      await transactionsResource.capture(1001, { amount: 10000 })
 
       expect(mockCore.request).toHaveBeenCalledWith({
         method: 'PUT',
@@ -122,7 +122,7 @@ describe('transactionsResource', () => {
     it('should capture a transaction with partial amount', async () => {
       mockCore.request = vi.fn().mockResolvedValue({})
 
-      await transactionsResource.capture(1001, 5000)
+      await transactionsResource.capture(1001, { amount: 5000 })
 
       expect(mockCore.request).toHaveBeenCalledWith({
         method: 'PUT',
@@ -134,7 +134,7 @@ describe('transactionsResource', () => {
     it('should handle string ID', async () => {
       mockCore.request = vi.fn().mockResolvedValue({})
 
-      await transactionsResource.capture('1001' as any, 7500)
+      await transactionsResource.capture('1001' as any, { amount: 7500 })
 
       expect(mockCore.request).toHaveBeenCalledWith({
         method: 'PUT',
