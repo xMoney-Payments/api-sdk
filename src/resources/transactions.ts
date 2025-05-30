@@ -52,8 +52,8 @@ export interface TransactionSummary {
   fraudScore?: number
   cardProviderId?: number
   cardProvider?: string
-  cardProviderName?: string
   cardHolderName?: string
+  cardProviderName?: string
   cardHolderCountry?: string
   cardHolderState?: string
   cardType?: string
@@ -87,8 +87,8 @@ export interface TransactionListParams {
   transactionType?: 'deposit' | 'refund' | 'credit' | 'chargeback' | 'representment'
   transactionStatus?: TransactionStatus[]
   dateType?: 'creation' | 'approval' | 'refund' | 'cancellation' | 'charge-back'
-  createdAtFrom?: string
-  createdAtTo?: string
+  createdAtFrom?: Date
+  createdAtTo?: Date
   greaterThanId?: number
   source?: Array<'service-call' | 're-bill' | 're-bill-micro' | 'card-change'>
   ip?: string

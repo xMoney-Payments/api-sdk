@@ -1,8 +1,8 @@
-import type { Card } from '../../src/resources/cards'
+import type { Card } from '../../src/resources'
 import type { XMoneyCore } from '../../src/types'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { PaginatedList } from '../../src/core/pagination'
-import { CardsResource } from '../../src/resources/cards'
+import { PaginatedList } from '../../src/core'
+import { CardsResource } from '../../src/resources'
 
 describe('cardsResource', () => {
   let mockCore: XMoneyCore
@@ -12,29 +12,16 @@ describe('cardsResource', () => {
     id: 123,
     customerId: 456,
     cardStatus: 'active',
-    verified: true,
-    cvvVerified: true,
-    issueDate: `${new Date('2025-01-01').toISOString().slice(0, -5)}+00:00}`,
-    expiryDate: `${new Date('2025-12-31').toISOString().slice(0, -5)}+00:00`,
-    cardholderName: 'John Doe',
-    last4: '1234',
     type: 'visa',
-    bin: {
+    binInfo: {
       bin: '424242',
       brand: 'Visa',
-      issuer: 'Test Bank',
-      issuerCountry: 'US',
-      issuerCountryAlpha3: 'USA',
-      issuerCountryNumeric: '840',
       type: 'credit',
-      subBrand: null,
-      bankUrl: 'https://testbank.com',
-      bankPhone: '+1234567890',
     },
-    tags: [{ key: 'type', value: 'premium' }],
-    fingerprint: 'card_fingerprint_123',
-    walletType: null,
-    additionalData: {},
+    cardNumber: '4111111111111111',
+    expiryMonth: '01',
+    expiryYear: '2999',
+    cardProvider: 'Test Bank',
   }
 
   beforeEach(() => {
@@ -214,7 +201,7 @@ describe('cardsResource', () => {
         }
       })
 
-      const result = await cardsResource.list({ limit: 1 })
+      const result = await cardsResource.list({ perPage: 1 })
 
       expect(result.hasMore).toBe(true)
       expect(result.data).toEqual(firstPageData)
@@ -241,12 +228,12 @@ describe('cardsResource', () => {
         },
       })
 
-      await cardsResource.list({ tag: 'vip' })
+      await cardsResource.list({ cardStatus: 'all' })
 
       expect(mockCore.request).toHaveBeenCalledWith({
         method: 'GET',
         path: '/card',
-        query: { tag: 'vip' },
+        query: { cardStatus: 'all' },
       })
     })
   })

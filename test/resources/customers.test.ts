@@ -1,8 +1,8 @@
-import type { Customer, CustomerCreateParams, CustomerUpdateParams } from '../../src/resources/customers'
+import type { Customer, CustomerCreateParams, CustomerUpdateParams } from '../../src/resources'
 import type { XMoneyCore } from '../../src/types'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { PaginatedList, SearchResult } from '../../src/core/pagination'
-import { CustomersResource } from '../../src/resources/customers'
+import { PaginatedList, SearchResult } from '../../src/core'
+import { CustomersResource } from '../../src/resources'
 
 describe('customersResource', () => {
   let mockCore: XMoneyCore
@@ -11,13 +11,20 @@ describe('customersResource', () => {
   const mockCustomer: Customer = {
     id: 123,
     siteId: 456,
-    creationDate: `${new Date('2025-01-01').toISOString().slice(0, -5)}+00:00`,
-    updatedAt: new Date('2025-01-02'),
-    email: 'john.doe@example.com',
+    identifier: 'ref_123',
     firstName: 'John',
     lastName: 'Doe',
-    referenceId: 'ref_123',
-    status: 'active',
+    country: 'US',
+    state: 'CA',
+    city: 'San Francisco',
+    zipCode: '94105',
+    address: '123 Market St',
+    phone: '+14155551234',
+    email: 'john.doe@example.com',
+    isWhitelisted: 0,
+    isWhitelistedUntil: undefined,
+    creationDate: `${new Date('2025-01-01').toISOString().slice(0, -5)}+00:00`,
+    creationTimestamp: new Date('2025-01-01').getTime(),
     tags: [
       {
         tag: 'premium',
@@ -25,12 +32,6 @@ describe('customersResource', () => {
         creationTimestamp: new Date('2025-01-01').getTime(),
       },
     ],
-    hasDefaultCard: true,
-    hasOtherCards: true,
-    hasSuccessfulTransaction: true,
-    isReturning: true,
-    totalAmountSpent: '1000.00',
-    totalTransactions: 10,
   }
 
   beforeEach(() => {

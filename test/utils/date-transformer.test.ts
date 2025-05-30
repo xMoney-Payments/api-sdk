@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { DateTransformer } from '../../src/utils/date-transformer'
+import { DateTransformer } from '../../src/utils'
 
 describe('dateTransformer', () => {
   describe('toApi', () => {

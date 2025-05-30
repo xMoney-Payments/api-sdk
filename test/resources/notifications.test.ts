@@ -1,8 +1,8 @@
-import type { Notification } from '../../src/resources/notifications'
+import type { Notification } from '../../src/resources'
 import type { XMoneyCore } from '../../src/types'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { PaginatedList } from '../../src/core/pagination'
-import { NotificationsResource } from '../../src/resources/notifications'
+import { PaginatedList } from '../../src/core'
+import { NotificationsResource } from '../../src/resources'
 
 describe('notificationsResource', () => {
   let mockCore: XMoneyCore
@@ -10,42 +10,12 @@ describe('notificationsResource', () => {
 
   const mockNotification: Notification = {
     id: 5001,
-    organisationId: 456,
-    createdAt: new Date('2025-01-01T12:00:00Z'),
-    updatedAt: new Date('2025-01-01T12:00:30Z'),
-    type: 'webhook',
-    event: 'transaction.successful',
-    url: 'https://example.com/webhooks/xmoney',
-    status: 'successful',
-    attempts: 1,
-    lastAttemptAt: new Date('2025-01-01T12:00:15Z'),
-    nextAttemptAt: null,
-    request: {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-XMoney-Signature': 'signature_123',
-      },
-      body: JSON.stringify({
-        event: 'transaction.successful',
-        data: { transactionId: 1001 },
-      }),
-    },
-    response: {
-      status: 200,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: '{"received":true}',
-    },
-    message: {
-      event: 'transaction.successful',
-      data: {
-        transactionId: 1001,
-        amount: 10000,
-        currency: 'USD',
-      },
-    },
+    siteId: 456,
+    resourceId: 1001,
+    resourceType: 'transaction',
+    message: 'transactionCapture',
+    creationDate: `${new Date('2025-01-01').toISOString().slice(0, -5)}+00:00`,
+    creationTimestamp: new Date('2025-01-01').getTime(),
   }
 
   beforeEach(() => {

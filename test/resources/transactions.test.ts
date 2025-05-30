@@ -1,72 +1,75 @@
-import type { Transaction, TransactionListParams, TransactionStatus, TransactionSummary } from '../../src/resources/transactions'
+import type { Transaction, TransactionListParams, TransactionSummary } from '../../src/resources'
 import type { XMoneyCore } from '../../src/types'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { PaginatedList, SearchResult } from '../../src/core/pagination'
-import { TransactionsResource } from '../../src/resources/transactions'
+import { PaginatedList, SearchResult } from '../../src/core'
+import { TransactionsResource } from '../../src/resources'
 
 describe('transactionsResource', () => {
   let mockCore: XMoneyCore
   let transactionsResource: TransactionsResource
 
-  const mockTransaction: Transaction = {
+  const mockTransactionSummary: TransactionSummary = {
     id: 1001,
-    organisationId: 456,
-    createdAt: new Date('2025-01-01T10:00:00Z'),
-    updatedAt: new Date('2025-01-01T10:01:00Z'),
+    siteId: 456,
     orderId: 12345,
-    type: 'preauth',
-    amount: 10000,
-    capturedAmount: 10000,
-    refundedAmount: 0,
+    customerId: 789,
+    transactionType: 'credit',
+    transactionMethod: 'card',
+    transactionStatus: 'complete-ok',
+    ip: '10.0.0.1',
+    amount: '10000',
     currency: 'USD',
-    status: 'successful',
-    gateway: 'stripe',
-    referenceId: 'trans_ref_1001',
-    responseCode: '00',
-    responseMessage: 'Approved',
-    avsResponseCode: 'Y',
-    cvvResponseCode: 'M',
-    rrn: 'RRN123456',
-    stan: 'STAN789',
+    amountInEur: '8822.43',
+    description: 'Payment for order #12345',
+    customerCountry: 'US',
+    creationDate: `${new Date('2025-01-01').toISOString().slice(0, -5)}+00:00`,
+    creationTimestamp: new Date('2025-01-01').getTime(),
+    transactionSource: 'card-change',
+    adminId: 789,
+    fraudScore: 0,
+    cardProviderId: 123,
+    cardProvider: 'argus',
+    cardProviderName: 'Argus Payments',
+    cardHolderName: 'John Doe',
+    cardHolderCountry: 'US',
+    cardHolderState: 'CA',
+    cardType: 'visa',
+    cardNumber: '4111111111111111',
+    cardExpiryDate: '01/99',
+    email: 'customer@example.com',
+    cardId: 111,
+    backUrl: 'https://example.com/callback',
+    externalCustomData: JSON.stringify({ referenceId: 'trans_ref_1001' }),
+    cardDescriptor: 'XMoney Transaction',
+  }
+
+  const mockTransaction: Transaction = {
+    ...mockTransactionSummary,
+    parentTransactionId: undefined,
+    relatedTransactionIds: [],
     card: {
       id: 111,
       customerId: 789,
-      cardStatus: 'active',
-      verified: true,
-      cvvVerified: true,
-      issueDate: new Date('2025-01-01'),
-      expiryDate: new Date('2025-12-31'),
-      cardholderName: 'John Doe',
-      last4: '4242',
       type: 'visa',
-      tags: [],
-      fingerprint: 'fp_card_111',
-      walletType: null,
-      additionalData: {},
+      cardNumber: '4111111111111111',
+      expiryMonth: '01',
+      expiryYear: '2999',
+      nameOnCard: 'John Doe',
+      cardHolderCountry: 'US',
+      cardHolderState: 'CA',
+      cardProvider: 'argus',
+      hasToken: false,
+      cardStatus: 'active',
+      binInfo: {
+        bin: '411111',
+        brand: 'visa',
+        type: 'debit',
+        level: 'standard',
+        countryCode: 'US',
+        bank: 'Bank of America',
+      },
     },
-    additionalData: {
-      processorTransactionId: 'proc_123',
-    },
-  }
-
-  const mockTransactionSummary: TransactionSummary = {
-    id: 1001,
-    organisationId: 456,
-    createdAt: new Date('2025-01-01T10:00:00Z'),
-    updatedAt: new Date('2025-01-01T10:01:00Z'),
-    orderId: 12345,
-    type: 'preauth',
-    amount: 10000,
-    capturedAmount: 10000,
-    refundedAmount: 0,
-    currency: 'USD',
-    status: 'successful',
-    gateway: 'stripe',
-    referenceId: 'trans_ref_1001',
-    responseCode: '00',
-    responseMessage: 'Approved',
-    cardId: 111,
-    customerId: 789,
+    components: [],
   }
 
   beforeEach(() => {
@@ -307,9 +310,9 @@ describe('transactionsResource', () => {
     })
 
     it('should fetch search results', async () => {
-      const searchParams = {
+      const searchParams: TransactionListParams = {
         walletProvider: 'paypal',
-        transactionStatus: ['complete-failed'] as TransactionStatus[],
+        transactionStatus: ['complete-failed'],
       }
 
       mockCore.request = vi.fn()

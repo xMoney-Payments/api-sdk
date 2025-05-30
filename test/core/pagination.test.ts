@@ -1,6 +1,6 @@
 import type { Pagination } from '../../src/types'
 import { describe, expect, it, vi } from 'vitest'
-import { PaginatedList, SearchResult } from '../../src/core/pagination'
+import { PaginatedList, SearchResult } from '../../src/core'
 
 describe('paginatedList', () => {
   const mockData = [

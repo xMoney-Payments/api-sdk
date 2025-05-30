@@ -1,7 +1,6 @@
 import type { HttpClient, HttpResponse, PlatformProvider } from '../../src/types'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { XMoneyClient } from '../../src/core/client'
-import { XMoneyError } from '../../src/core/error'
+import { XMoneyClient, XMoneyError } from '../../src/core'
 
 describe('xMoneyClient', () => {
   let mockHttpClient: HttpClient
@@ -10,9 +9,12 @@ describe('xMoneyClient', () => {
 
   beforeEach(() => {
     mockResponse = {
+      statusText: 'OK',
       ok: true,
       status: 200,
-      json: vi.fn().mockResolvedValue({ data: 'test' }),
+      headers: {},
+      json: vi.fn().mockResolvedValue({ data: 'success' }),
+      text: vi.fn().mockResolvedValue('success'),
     }
 
     mockHttpClient = {
@@ -20,10 +22,17 @@ describe('xMoneyClient', () => {
     }
 
     mockPlatformProvider = {
-      getWebSocket: vi.fn(),
-      setSecureStorage: vi.fn(),
-      getSecureStorage: vi.fn(),
-      removeSecureStorage: vi.fn(),
+      crypto: {
+        createHmacSha512: vi.fn(),
+        createDecipherAes256Cbc: vi.fn(),
+      },
+      buffer: {
+        from: vi.fn(),
+        alloc: vi.fn(),
+        byteLength: vi.fn(),
+        concat: vi.fn(),
+        toString: vi.fn(),
+      },
     }
   })
 

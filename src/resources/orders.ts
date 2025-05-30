@@ -17,9 +17,9 @@ export interface Order {
   createdAt?: string // ISO 8601 date-time
   intervalType?: 'day' | 'month'
   intervalValue?: number
-  retryPayment?: string
+  retryPayment?: string // comma separated values representing retry intervals for failed payments, ISO 8601 duration format
   nextDueDate?: string // ISO 8601 date-time
-  transactionMethod?: string
+  transactionMethod?: 'card' | 'wallet' | string
   tags?: Tag[]
 }
 

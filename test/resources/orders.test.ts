@@ -1,8 +1,8 @@
-import type { CreateOrderResponse, Order, OrderCreateParams, OrderListParams, OrderRebillParams, OrderUpdateCardParams } from '../../src/resources/orders'
+import type { CreateOrderResponse, Order, OrderCreateParams, OrderListParams, OrderRebillParams, OrderUpdateCardParams } from '../../src/resources'
 import type { XMoneyCore } from '../../src/types'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { PaginatedList, SearchResult } from '../../src/core/pagination'
-import { OrdersResource } from '../../src/resources/orders'
+import { PaginatedList, SearchResult } from '../../src/core'
+import { OrdersResource } from '../../src/resources'
 
 describe('ordersResource', () => {
   let mockCore: XMoneyCore
@@ -11,67 +11,20 @@ describe('ordersResource', () => {
   const mockOrder: Order = {
     id: 12345,
     siteId: 456,
-    createdAt: `${new Date('2025-01-01').toISOString().slice(0, -5)}+00:00`,
-    updatedAt: new Date('2025-01-01'),
-    orderId: 'order_12345',
+    customerId: 789,
     externalOrderId: 'ref_12345',
-    type: 'single_payment',
+    orderType: 'purchase',
+    orderStatus: 'complete-ok',
     amount: 10000,
     currency: 'USD',
-    status: 'complete',
-    valid: true,
-    cancelled: false,
-    transactionComponents: [
-      {
-        id: 1,
-        type: 'preauth',
-        amount: 10000,
-        amountRefunded: 0,
-        currency: 'USD',
-        status: 'successful',
-        createdAt: new Date('2025-01-01'),
-      },
-    ],
-    amountPaid: 10000,
-    amountAuthorized: 10000,
-    amountCaptured: 10000,
-    amountRefunded: 0,
-    customer: {
-      id: 789,
-      organisationId: 456,
-      createdAt: new Date('2025-12-01'),
-      updatedAt: new Date('2025-12-01'),
-      email: 'customer@example.com',
-      firstName: 'John',
-      lastName: 'Doe',
-      referenceId: 'cust_ref_789',
-      status: 'active',
-      tags: [],
-      hasDefaultCard: true,
-      hasOtherCards: false,
-      hasSuccessfulTransaction: true,
-      isReturning: false,
-      totalAmountSpent: '10000',
-      totalTransactions: 1,
-    },
-    card: {
-      id: 111,
-      customerId: 789,
-      status: 'active',
-      verified: true,
-      cvvVerified: true,
-      issueDate: new Date('2025-01-01'),
-      expiryDate: new Date('2025-12-31'),
-      cardholderName: 'John Doe',
-      last4: '4242',
-      type: 'visa',
-      tags: [],
-      fingerprint: 'fp_card_111',
-      walletType: null,
-      additionalData: {},
-    },
-    customerIp: '192.168.1.1',
-    transactions: [1001, 1002],
+    description: 'Test order description',
+    invoiceEmail: 'customer@example.com',
+    createdAt: `${new Date('2025-01-01').toISOString().slice(0, -5)}+00:00`,
+    intervalType: 'month',
+    intervalValue: 1,
+    retryPayment: 'P1M,P2M',
+    nextDueDate: `${new Date('2025-02-01').toISOString().slice(0, -5)}+00:00`,
+    transactionMethod: 'card',
     tags: [
       {
         tag: 'web',
@@ -79,8 +32,6 @@ describe('ordersResource', () => {
         creationTimestamp: 1735689600,
       },
     ],
-    errors: [],
-    metadata: {},
   }
 
   beforeEach(() => {
@@ -293,7 +244,7 @@ describe('ordersResource', () => {
   describe('updateCard', () => {
     it('should update card for an order', async () => {
       const params: OrderUpdateCardParams = {
-        customerId: 789,
+        customerId: '789',
         ip: '10.0.0.1',
         amount: 6000,
         currency: 'USD',
@@ -330,7 +281,7 @@ describe('ordersResource', () => {
 
     it('should update card with minimal parameters', async () => {
       const params: OrderUpdateCardParams = {
-        customerId: 789,
+        customerId: '789',
         ip: '10.0.0.1',
         amount: 3000,
         currency: 'USD',

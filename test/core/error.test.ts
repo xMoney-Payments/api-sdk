@@ -1,6 +1,6 @@
 import type { ApiError } from '../../src/types'
 import { describe, expect, it } from 'vitest'
-import { XMoneyError } from '../../src/core/error'
+import { XMoneyError } from '../../src/core'
 
 describe('xMoneyError', () => {
   it('should create error with message only', () => {
@@ -32,8 +32,8 @@ describe('xMoneyError', () => {
     it('should return true when validation errors exist', () => {
       const error = new XMoneyError('Validation failed', {
         errors: [
-          { type: 'Validation', field: 'email', message: 'Invalid email' },
-          { type: 'Required', field: 'name', message: 'Name is required' },
+          { type: 'Validation', field: 'email', message: 'Invalid email', code: 1001 },
+          { type: 'Validation', field: 'name', message: 'Name is required', code: 1002 },
         ],
       })
 
@@ -43,7 +43,7 @@ describe('xMoneyError', () => {
     it('should return false when no validation errors exist', () => {
       const error = new XMoneyError('Server error', {
         errors: [
-          { type: 'Server', message: 'Internal server error' },
+          { type: 'Exception', message: 'Internal server error', code: 5001 },
         ],
       })
 
@@ -67,9 +67,9 @@ describe('xMoneyError', () => {
     it('should return validation errors as key-value pairs', () => {
       const error = new XMoneyError('Validation failed', {
         errors: [
-          { type: 'Validation', field: 'email', message: 'Invalid email format' },
-          { type: 'Validation', field: 'password', message: 'Password too short' },
-          { type: 'Required', field: 'name', message: 'Name is required' },
+          { type: 'Validation', field: 'email', message: 'Invalid email format', code: 1001 },
+          { type: 'Validation', field: 'password', message: 'Password too short', code: 1002 },
+          { type: 'Validation', field: 'name', message: 'Name is required', code: 1003 },
         ],
       })
 
@@ -82,8 +82,8 @@ describe('xMoneyError', () => {
     it('should handle validation errors without field', () => {
       const error = new XMoneyError('Validation failed', {
         errors: [
-          { type: 'Validation', message: 'General validation error' },
-          { type: 'Validation', field: 'email', message: 'Invalid email' },
+          { type: 'Validation', message: 'General validation error', code: 1004 },
+          { type: 'Validation', field: 'email', message: 'Invalid email', code: 1005 },
         ],
       })
 
@@ -95,7 +95,7 @@ describe('xMoneyError', () => {
     it('should return empty object when no validation errors', () => {
       const error = new XMoneyError('Error', {
         errors: [
-          { type: 'Server', message: 'Server error' },
+          { type: 'Exception', message: 'Server error', code: 5001 },
         ],
       })
 
@@ -110,8 +110,8 @@ describe('xMoneyError', () => {
     it('should handle multiple errors for the same field (last one wins)', () => {
       const error = new XMoneyError('Validation failed', {
         errors: [
-          { type: 'Validation', field: 'email', message: 'Invalid format' },
-          { type: 'Validation', field: 'email', message: 'Email already exists' },
+          { type: 'Validation', field: 'email', message: 'Invalid format', code: 1001 },
+          { type: 'Validation', field: 'email', message: 'Email already exists', code: 1002 },
         ],
       })
 
@@ -132,7 +132,7 @@ describe('xMoneyError', () => {
       statusCode: 403,
       code: 2001,
       errors: [
-        { type: 'Authorization', message: 'Forbidden' },
+        { type: 'Exception', message: 'Forbidden', code: 2001 },
       ] as ApiError[],
     }
 

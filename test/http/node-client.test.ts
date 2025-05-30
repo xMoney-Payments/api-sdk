@@ -1,8 +1,8 @@
-import type { HttpRequestOptions } from '../../src/http/types'
+import type { HttpRequestOptions } from '../../src/http'
 import { EventEmitter } from 'node:events'
 import { PassThrough } from 'node:stream'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { NodeHttpClient } from '../../src/http/node-client'
+import { NodeHttpClient } from '../../src/http'
 
 // Mock Node.js modules
 vi.mock('node:https', () => ({

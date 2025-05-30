@@ -1,6 +1,6 @@
-import type { HttpRequestOptions } from '../../src/http/types'
+import type { HttpRequestOptions } from '../../src/http'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { FetchHttpClient } from '../../src/http/fetch-client'
+import { FetchHttpClient } from '../../src/http'
 
 describe('fetchHttpClient', () => {
   let mockFetch: ReturnType<typeof vi.fn>
@@ -43,10 +43,10 @@ describe('fetchHttpClient', () => {
   })
 
   describe('request', () => {
-    const mockHeaders = new Map([
-      ['content-type', 'application/json'],
-      ['x-custom-header', 'value'],
-    ])
+    const mockHeaders = {
+      'content-type': 'application/json',
+      'x-custom-header': 'value',
+    }
 
     const mockResponse = {
       ok: true,
