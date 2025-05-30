@@ -12,7 +12,8 @@ export class FetchHttpClient implements HttpClient {
     const timeoutId = setTimeout(() => controller.abort(), options.timeout)
 
     try {
-      const response = await this.fetchFn(options.url, {
+      const url = this.buildUrl(options)
+      const response = await this.fetchFn(url, {
         method: options.method,
         headers: options.headers,
         body: options.body,
@@ -31,6 +32,12 @@ export class FetchHttpClient implements HttpClient {
     finally {
       clearTimeout(timeoutId)
     }
+  }
+
+  private buildUrl(options: HttpRequestOptions): string {
+    const { protocol, host, port, path } = options
+    const portString = port && port !== (protocol === 'https' ? 443 : 80) ? `:${port}` : ''
+    return `${protocol}://${host}${portString}${path}`
   }
 
   private parseHeaders(headers: Headers): Record<string, string> {

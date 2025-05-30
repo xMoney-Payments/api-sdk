@@ -1,10 +1,12 @@
-import type { HttpClient, HttpMethod } from './http'
+import type { HttpClient, HttpMethod, HttpProtocol } from './http'
 import type { PlatformProvider } from './platform/types'
 
 export interface XMoneyConfig {
   apiKey: string
   secureToken?: string
   host?: string
+  port?: string | number
+  protocol?: HttpProtocol
   timeout?: number
   maxRetries?: number
   httpClient?: HttpClient

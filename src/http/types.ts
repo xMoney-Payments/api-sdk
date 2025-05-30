@@ -1,15 +1,19 @@
 // https://www.rfc-editor.org/rfc/rfc7231#section-4.1
 export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'OPTIONS' | 'HEAD' | 'CONNECT' | 'TRACE'
+export type HttpProtocol = 'http' | 'https'
 
 export interface HttpClient {
   request: (options: HttpRequestOptions) => Promise<HttpResponse>
 }
 
 export interface HttpRequestOptions {
+  host: string
+  port: string | number
+  path: string
   method: HttpMethod
-  url: string
   headers: Record<string, string>
   body?: string
+  protocol: HttpProtocol
   timeout: number
 }
 

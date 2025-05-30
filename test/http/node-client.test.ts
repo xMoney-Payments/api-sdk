@@ -5,17 +5,25 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { NodeHttpClient } from '../../src/http'
 
 // Mock Node.js modules
-vi.mock('node:https', () => ({
-  request: vi.fn(),
-}))
+vi.mock('node:https', () => {
+  const mockRequest = vi.fn()
+  const module = { request: mockRequest }
+  return {
+    ...module,
+    default: module,
+  }
+})
 
-vi.mock('node:http', () => ({
-  request: vi.fn(),
-}))
+vi.mock('node:http', () => {
+  const mockRequest = vi.fn()
+  const module = { request: mockRequest }
+  return {
+    ...module,
+    default: module,
+  }
+})
 
-vi.mock('node:url', () => ({
-  URL: globalThis.URL,
-}))
+// URL mock removed as we don't need to parse URLs anymore
 
 describe('nodeHttpClient', () => {
   let client: NodeHttpClient
@@ -25,6 +33,7 @@ describe('nodeHttpClient', () => {
   beforeEach(async () => {
     client = new NodeHttpClient()
 
+    // Get the mocked functions
     const https = await import('node:https')
     const http = await import('node:http')
 
@@ -47,7 +56,7 @@ describe('nodeHttpClient', () => {
       mockRequest.end = vi.fn()
       mockRequest.destroy = vi.fn()
 
-      // Create mock response object
+      // Create fresh mock response object each time
       mockResponse = new PassThrough() as any
       mockResponse.statusCode = 200
       mockResponse.statusMessage = 'OK'
@@ -56,39 +65,32 @@ describe('nodeHttpClient', () => {
         'x-custom-header': 'value',
       }
 
-      // Setup mocks to return our mock objects
-      mockHttpsRequest.mockImplementation((options, callback) => {
-        // Simulate async connection
-        setImmediate(() => {
-          callback(mockResponse)
-          // Emit data after callback
-          setImmediate(() => {
-            mockResponse.emit('data', '{"data":"test"}')
-            mockResponse.emit('end')
-          })
-        })
-        return mockRequest
-      })
-
-      mockHttpRequest.mockImplementation((options, callback) => {
-        setImmediate(() => {
-          callback(mockResponse)
-          setImmediate(() => {
-            mockResponse.emit('data', '{"data":"test"}')
-            mockResponse.emit('end')
-          })
-        })
-        return mockRequest
-      })
+      // Clear all mock implementations
+      mockHttpsRequest.mockClear()
+      mockHttpRequest.mockClear()
     })
 
     it('should make successful HTTPS GET request', async () => {
       const options: HttpRequestOptions = {
         method: 'GET',
-        url: 'https://api.example.com/test',
+        protocol: 'https',
+        host: 'api.example.com',
+        port: 443,
+        path: '/test',
         headers: { Authorization: 'Bearer token' },
         timeout: 5000,
       }
+
+      mockHttpsRequest.mockImplementation((options, callback) => {
+        setImmediate(() => {
+          callback(mockResponse)
+          setImmediate(() => {
+            mockResponse.emit('data', '{"data":"test"}')
+            mockResponse.emit('end')
+          })
+        })
+        return mockRequest
+      })
 
       const response = await client.request(options)
 
@@ -117,7 +119,10 @@ describe('nodeHttpClient', () => {
     it('should make successful HTTP request', async () => {
       const options: HttpRequestOptions = {
         method: 'GET',
-        url: 'http://api.example.com/test',
+        protocol: 'http',
+        host: 'api.example.com',
+        port: 80,
+        path: '/test',
         headers: {},
         timeout: 5000,
       }
@@ -143,7 +148,10 @@ describe('nodeHttpClient', () => {
     it('should handle custom port', async () => {
       const options: HttpRequestOptions = {
         method: 'GET',
-        url: 'https://api.example.com:8443/test',
+        protocol: 'https',
+        host: 'api.example.com',
+        port: 8443,
+        path: '/test',
         headers: {},
         timeout: 5000,
       }
@@ -152,7 +160,7 @@ describe('nodeHttpClient', () => {
 
       expect(mockHttpsRequest).toHaveBeenCalledWith(
         expect.objectContaining({
-          port: '8443',
+          port: 8443,
         }),
         expect.any(Function),
       )
@@ -161,7 +169,10 @@ describe('nodeHttpClient', () => {
     it('should handle query parameters', async () => {
       const options: HttpRequestOptions = {
         method: 'GET',
-        url: 'https://api.example.com/test?page=1&limit=10',
+        protocol: 'https',
+        host: 'api.example.com',
+        port: 443,
+        path: '/test?page=1&limit=10',
         headers: {},
         timeout: 5000,
       }
@@ -179,7 +190,10 @@ describe('nodeHttpClient', () => {
     it('should make POST request with body', async () => {
       const options: HttpRequestOptions = {
         method: 'POST',
-        url: 'https://api.example.com/test',
+        protocol: 'https',
+        host: 'api.example.com',
+        port: 443,
+        path: '/test',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: 'test' }),
         timeout: 5000,
@@ -209,7 +223,10 @@ describe('nodeHttpClient', () => {
 
       const options: HttpRequestOptions = {
         method: 'GET',
-        url: 'https://api.example.com/notfound',
+        protocol: 'https',
+        host: 'api.example.com',
+        port: 443,
+        path: '/notfound',
         headers: {},
         timeout: 5000,
       }
@@ -235,7 +252,10 @@ describe('nodeHttpClient', () => {
     it('should handle network errors', async () => {
       const options: HttpRequestOptions = {
         method: 'GET',
-        url: 'https://api.example.com/test',
+        protocol: 'https',
+        host: 'api.example.com',
+        port: 443,
+        path: '/test',
         headers: {},
         timeout: 5000,
       }
@@ -259,7 +279,10 @@ describe('nodeHttpClient', () => {
     it('should handle timeout', async () => {
       const options: HttpRequestOptions = {
         method: 'GET',
-        url: 'https://api.example.com/test',
+        protocol: 'https',
+        host: 'api.example.com',
+        port: 443,
+        path: '/test',
         headers: {},
         timeout: 100,
       }
@@ -283,7 +306,10 @@ describe('nodeHttpClient', () => {
     it('should handle empty response', async () => {
       const options: HttpRequestOptions = {
         method: 'GET',
-        url: 'https://api.example.com/test',
+        protocol: 'https',
+        host: 'api.example.com',
+        port: 443,
+        path: '/test',
         headers: {},
         timeout: 5000,
       }
@@ -306,22 +332,35 @@ describe('nodeHttpClient', () => {
     })
 
     it('should handle response in chunks', async () => {
+      // Reset all mocks for this test
+      mockHttpsRequest.mockReset()
+      mockHttpRequest.mockReset()
+
       const options: HttpRequestOptions = {
         method: 'GET',
-        url: 'https://api.example.com/test',
+        protocol: 'https',
+        host: 'api.example.com',
+        port: 443,
+        path: '/test',
         headers: {},
         timeout: 5000,
       }
 
+      // Reset mock response to emit the expected data
+      const chunkedResponse = new PassThrough() as any
+      chunkedResponse.statusCode = 200
+      chunkedResponse.statusMessage = 'OK'
+      chunkedResponse.headers = mockResponse.headers
+
       mockHttpsRequest.mockImplementation((options, callback) => {
         setImmediate(() => {
-          callback(mockResponse)
+          callback(chunkedResponse)
           setImmediate(() => {
             // Emit data in multiple chunks
-            mockResponse.emit('data', '{"name":')
-            mockResponse.emit('data', '"John",')
-            mockResponse.emit('data', '"age":30}')
-            mockResponse.emit('end')
+            chunkedResponse.emit('data', '{"name":')
+            chunkedResponse.emit('data', '"John",')
+            chunkedResponse.emit('data', '"age":30}')
+            chunkedResponse.emit('end')
           })
         })
         return mockRequest
@@ -337,7 +376,10 @@ describe('nodeHttpClient', () => {
 
       const options: HttpRequestOptions = {
         method: 'GET',
-        url: 'https://api.example.com/test',
+        protocol: 'https',
+        host: 'api.example.com',
+        port: 443,
+        path: '/test',
         headers: {},
         timeout: 5000,
       }
@@ -362,7 +404,10 @@ describe('nodeHttpClient', () => {
     it('should handle PUT request with body', async () => {
       const options: HttpRequestOptions = {
         method: 'PUT',
-        url: 'https://api.example.com/test/1',
+        protocol: 'https',
+        host: 'api.example.com',
+        port: 443,
+        path: '/test/1',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: 'updated' }),
         timeout: 5000,
@@ -393,7 +438,10 @@ describe('nodeHttpClient', () => {
     it('should handle DELETE request', async () => {
       const options: HttpRequestOptions = {
         method: 'DELETE',
-        url: 'https://api.example.com/test/1',
+        protocol: 'https',
+        host: 'api.example.com',
+        port: 443,
+        path: '/test/1',
         headers: {},
         timeout: 5000,
       }
@@ -417,19 +465,32 @@ describe('nodeHttpClient', () => {
     })
 
     it('should provide text method', async () => {
+      // Reset all mocks for this test
+      mockHttpsRequest.mockReset()
+      mockHttpRequest.mockReset()
+
       const options: HttpRequestOptions = {
         method: 'GET',
-        url: 'https://api.example.com/test',
+        protocol: 'https',
+        host: 'api.example.com',
+        port: 443,
+        path: '/test',
         headers: {},
         timeout: 5000,
       }
 
+      // Create a new response for text test
+      const textResponse = new PassThrough() as any
+      textResponse.statusCode = 200
+      textResponse.statusMessage = 'OK'
+      textResponse.headers = mockResponse.headers
+
       mockHttpsRequest.mockImplementation((options, callback) => {
         setImmediate(() => {
-          callback(mockResponse)
+          callback(textResponse)
           setImmediate(() => {
-            mockResponse.emit('data', 'Plain text response')
-            mockResponse.emit('end')
+            textResponse.emit('data', 'Plain text response')
+            textResponse.emit('end')
           })
         })
         return mockRequest
@@ -449,7 +510,10 @@ describe('nodeHttpClient', () => {
 
         const options: HttpRequestOptions = {
           method: 'GET',
-          url: 'https://api.example.com/test',
+          protocol: 'https',
+          host: 'api.example.com',
+          port: 443,
+          path: '/test',
           headers: {},
           timeout: 5000,
         }
@@ -480,7 +544,10 @@ describe('nodeHttpClient', () => {
 
         const options: HttpRequestOptions = {
           method: 'GET',
-          url: 'https://api.example.com/test',
+          protocol: 'https',
+          host: 'api.example.com',
+          port: 443,
+          path: '/test',
           headers: {},
           timeout: 5000,
         }

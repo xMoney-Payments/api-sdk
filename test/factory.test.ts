@@ -120,7 +120,10 @@ describe('createXMoneyClientFactory', () => {
       expect(result).toEqual({ data: 'success' })
       expect(mockHttpClient.request).toHaveBeenCalledWith({
         method: 'POST',
-        url: 'https://api-stage.xmoney.com/test',
+        protocol: 'https',
+        host: 'api.xmoney.com',
+        port: 443,
+        path: '/test',
         headers: {
           'Authorization': 'Bearer test-api-key',
           'Content-Type': 'application/x-www-form-urlencoded',
@@ -204,7 +207,10 @@ describe('createXMoneyClientFactory', () => {
 
       expect(mockHttpClient.request).toHaveBeenCalledWith(
         expect.objectContaining({
-          url: expect.stringContaining('https://api-stage.xmoney.com'),
+          protocol: 'https',
+          host: 'api.xmoney.com',
+          port: 443,
+          path: '/test',
           timeout: 80000,
           headers: expect.objectContaining({
             Authorization: 'Bearer api-key-123',
@@ -241,7 +247,10 @@ describe('createXMoneyClientFactory', () => {
 
       expect(mockHttpClient.request).toHaveBeenCalledWith(
         expect.objectContaining({
-          url: 'https://custom.host.com/test',
+          protocol: 'https',
+          host: 'custom.host.com',
+          port: 443,
+          path: '/test',
           timeout: 10000,
           headers: expect.objectContaining({
             Authorization: 'Bearer custom-key',

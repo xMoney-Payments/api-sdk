@@ -1,29 +1,29 @@
+import type { RequestOptions } from 'node:https'
 import type { HttpClient, HttpRequestOptions, HttpResponse } from './types'
+import * as http_ from 'node:http'
+import * as https_ from 'node:https'
+
+// Preserve compatibility with HTTP interception tools like MSW (Mock Service Worker)
+// by accessing the CommonJS module instead of the immutable ES module namespace.
+// This allows testing libraries to mock network requests at runtime.
+const http = ((http_ as unknown) as { default: typeof http_ }).default || http_
+const https = ((https_ as unknown) as { default: typeof https_ }).default || https_
 
 export class NodeHttpClient implements HttpClient {
   async request(options: HttpRequestOptions): Promise<HttpResponse> {
-    // Dynamic imports to avoid bundling Node.js modules in browser builds
-    const [{ request: httpsRequest }, { request: httpRequest }, { URL }] = await Promise.all([
-      import('node:https'),
-      import('node:http'),
-      import('node:url'),
-    ])
-
     return new Promise((resolve, reject) => {
-      const url = new URL(options.url)
-      const isHttps = url.protocol === 'https:'
-      const request = isHttps ? httpsRequest : httpRequest
+      const isHttps = options.protocol === 'https'
 
-      const requestOptions = {
-        hostname: url.hostname,
-        port: url.port || (isHttps ? 443 : 80),
-        path: url.pathname + url.search,
+      const requestOptions: RequestOptions = {
+        hostname: options.host,
+        port: options.port || (isHttps ? 443 : 80),
+        path: options.path,
         method: options.method,
         headers: options.headers,
         timeout: options.timeout,
       }
 
-      const req = request(requestOptions, (res) => {
+      const req = (isHttps ? https : http).request(requestOptions, (res) => {
         let data = ''
 
         res.on('data', (chunk) => {

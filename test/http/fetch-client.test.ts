@@ -64,7 +64,10 @@ describe('fetchHttpClient', () => {
     it('should make successful GET request', async () => {
       const options: HttpRequestOptions = {
         method: 'GET',
-        url: 'https://api.example.com/test',
+        protocol: 'https',
+        host: 'api.example.com',
+        port: 443,
+        path: '/test',
         headers: { Authorization: 'Bearer token' },
         timeout: 5000,
       }
@@ -87,7 +90,10 @@ describe('fetchHttpClient', () => {
     it('should make POST request with body', async () => {
       const options: HttpRequestOptions = {
         method: 'POST',
-        url: 'https://api.example.com/test',
+        protocol: 'https',
+        host: 'api.example.com',
+        port: 443,
+        path: '/test',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: 'test' }),
         timeout: 5000,
@@ -113,7 +119,10 @@ describe('fetchHttpClient', () => {
 
       const options: HttpRequestOptions = {
         method: 'GET',
-        url: 'https://api.example.com/notfound',
+        protocol: 'https',
+        host: 'api.example.com',
+        port: 443,
+        path: '/notfound',
         headers: {},
         timeout: 5000,
       }
@@ -128,7 +137,10 @@ describe('fetchHttpClient', () => {
     it('should parse headers correctly', async () => {
       const options: HttpRequestOptions = {
         method: 'GET',
-        url: 'https://api.example.com/test',
+        protocol: 'https',
+        host: 'api.example.com',
+        port: 443,
+        path: '/test',
         headers: {},
         timeout: 5000,
       }
@@ -144,7 +156,10 @@ describe('fetchHttpClient', () => {
     it('should handle timeout', async () => {
       const options: HttpRequestOptions = {
         method: 'GET',
-        url: 'https://api.example.com/test',
+        protocol: 'https',
+        host: 'api.example.com',
+        port: 443,
+        path: '/test',
         headers: {},
         timeout: 100,
       }
@@ -196,7 +211,10 @@ describe('fetchHttpClient', () => {
 
       const options: HttpRequestOptions = {
         method: 'GET',
-        url: 'https://api.example.com/test',
+        protocol: 'https',
+        host: 'api.example.com',
+        port: 443,
+        path: '/test',
         headers: {},
         timeout: 5000,
       }
@@ -212,7 +230,10 @@ describe('fetchHttpClient', () => {
 
       const options: HttpRequestOptions = {
         method: 'GET',
-        url: 'https://api.example.com/test',
+        protocol: 'https',
+        host: 'api.example.com',
+        port: 443,
+        path: '/test',
         headers: {},
         timeout: 5000,
       }
@@ -232,7 +253,10 @@ describe('fetchHttpClient', () => {
 
       const options: HttpRequestOptions = {
         method: 'GET',
-        url: 'https://api.example.com/test',
+        protocol: 'https',
+        host: 'api.example.com',
+        port: 443,
+        path: '/test',
         headers: {},
         timeout: 5000,
       }
@@ -248,7 +272,10 @@ describe('fetchHttpClient', () => {
 
       const options: HttpRequestOptions = {
         method: 'GET',
-        url: 'https://api.example.com/test',
+        protocol: 'https',
+        host: 'api.example.com',
+        port: 443,
+        path: '/test',
         headers: {},
         timeout: 5000,
       }
@@ -271,7 +298,10 @@ describe('fetchHttpClient', () => {
 
       const options: HttpRequestOptions = {
         method: 'GET',
-        url: 'https://api.example.com/test',
+        protocol: 'https',
+        host: 'api.example.com',
+        port: 443,
+        path: '/test',
         headers: {},
         timeout: 5000,
       }
@@ -287,7 +317,10 @@ describe('fetchHttpClient', () => {
     it('should provide text method', async () => {
       const options: HttpRequestOptions = {
         method: 'GET',
-        url: 'https://api.example.com/test',
+        protocol: 'https',
+        host: 'api.example.com',
+        port: 443,
+        path: '/test',
         headers: {},
         timeout: 5000,
       }
@@ -297,6 +330,50 @@ describe('fetchHttpClient', () => {
 
       expect(text).toBe('test response')
       expect(mockResponse.text).toHaveBeenCalledOnce()
+    })
+
+    it('should build URL correctly with custom port', async () => {
+      const options: HttpRequestOptions = {
+        method: 'GET',
+        protocol: 'https',
+        host: 'api.example.com',
+        port: 8443,
+        path: '/test',
+        headers: {},
+        timeout: 5000,
+      }
+
+      await client.request(options)
+
+      expect(mockFetch).toHaveBeenCalledWith('https://api.example.com:8443/test', expect.any(Object))
+    })
+
+    it('should build URL correctly without port for default ports', async () => {
+      const httpsOptions: HttpRequestOptions = {
+        method: 'GET',
+        protocol: 'https',
+        host: 'api.example.com',
+        port: 443,
+        path: '/test',
+        headers: {},
+        timeout: 5000,
+      }
+
+      await client.request(httpsOptions)
+      expect(mockFetch).toHaveBeenCalledWith('https://api.example.com/test', expect.any(Object))
+
+      const httpOptions: HttpRequestOptions = {
+        method: 'GET',
+        protocol: 'http',
+        host: 'api.example.com',
+        port: 80,
+        path: '/test',
+        headers: {},
+        timeout: 5000,
+      }
+
+      await client.request(httpOptions)
+      expect(mockFetch).toHaveBeenCalledWith('http://api.example.com/test', expect.any(Object))
     })
   })
 })

@@ -45,7 +45,8 @@ describe('xMoneyClient', () => {
       })
 
       expect(client.config.apiKey).toBe('test-key')
-      expect(client.config.host).toBe('https://api-stage.xmoney.com')
+      expect(client.config.protocol).toBe('https')
+      expect(client.config.host).toBe('api.xmoney.com')
       expect(client.config.timeout).toBe(80000)
       expect(client.config.maxRetries).toBe(3)
     })
@@ -64,7 +65,8 @@ describe('xMoneyClient', () => {
 
       expect(client.config).toMatchObject({
         apiKey: 'test-key',
-        host: 'https://custom.api.com',
+        protocol: 'https',
+        host: 'custom.api.com',
         timeout: 5000,
         maxRetries: 5,
       })
@@ -75,6 +77,47 @@ describe('xMoneyClient', () => {
         apiKey: 'test-key',
         httpClient: mockHttpClient,
       } as any)).toThrow('Platform provider is required')
+    })
+
+    it('should parse host URL with protocol', () => {
+      const client = new XMoneyClient({
+        apiKey: 'test-key',
+        host: 'https://api.xmoney.com',
+        platformProvider: mockPlatformProvider,
+        httpClient: mockHttpClient,
+      })
+
+      expect(client.config.protocol).toBe('https')
+      expect(client.config.host).toBe('api.xmoney.com')
+      expect(client.config.port).toBeUndefined()
+    })
+
+    it('should parse host URL with custom port', () => {
+      const client = new XMoneyClient({
+        apiKey: 'test-key',
+        host: 'https://api.xmoney.com:8443',
+        platformProvider: mockPlatformProvider,
+        httpClient: mockHttpClient,
+      })
+
+      expect(client.config.protocol).toBe('https')
+      expect(client.config.host).toBe('api.xmoney.com')
+      expect(client.config.port).toBe(8443)
+    })
+
+    it('should use provided protocol and port over parsed values', () => {
+      const client = new XMoneyClient({
+        apiKey: 'test-key',
+        host: 'https://api.xmoney.com:8443',
+        protocol: 'http',
+        port: 9000,
+        platformProvider: mockPlatformProvider,
+        httpClient: mockHttpClient,
+      })
+
+      expect(client.config.protocol).toBe('http')
+      expect(client.config.host).toBe('api.xmoney.com')
+      expect(client.config.port).toBe(9000)
     })
   })
 
@@ -98,7 +141,10 @@ describe('xMoneyClient', () => {
       expect(response).toEqual({ data: 'test' })
       expect(mockHttpClient.request).toHaveBeenCalledWith({
         method: 'GET',
-        url: 'https://api-stage.xmoney.com/test',
+        protocol: 'https',
+        host: 'api.xmoney.com',
+        port: 443,
+        path: '/test',
         headers: {
           Authorization: 'Bearer test-key',
         },
@@ -121,13 +167,13 @@ describe('xMoneyClient', () => {
       })
 
       const callArgs = (mockHttpClient.request as any).mock.calls[0][0]
-      const url = new URL(callArgs.url)
 
-      expect(url.searchParams.get('page')).toBe('1')
-      expect(url.searchParams.get('limit')).toBe('10')
-      expect(url.searchParams.getAll('filters')).toEqual(['active', 'pending'])
-      expect(url.searchParams.has('nullValue')).toBe(false)
-      expect(url.searchParams.has('undefinedValue')).toBe(false)
+      expect(callArgs.path).toContain('page=1')
+      expect(callArgs.path).toContain('limit=10')
+      expect(callArgs.path).toContain('filters=active')
+      expect(callArgs.path).toContain('filters=pending')
+      expect(callArgs.path).not.toContain('nullValue')
+      expect(callArgs.path).not.toContain('undefinedValue')
     })
 
     it('should handle POST request with form data', async () => {
@@ -147,7 +193,10 @@ describe('xMoneyClient', () => {
 
       expect(mockHttpClient.request).toHaveBeenCalledWith({
         method: 'POST',
-        url: 'https://api-stage.xmoney.com/test',
+        protocol: 'https',
+        host: 'api.xmoney.com',
+        port: 443,
+        path: '/test',
         headers: {
           'Authorization': 'Bearer test-key',
           'Content-Type': 'application/x-www-form-urlencoded',
@@ -274,7 +323,8 @@ describe('xMoneyClient', () => {
       })
 
       const callArgs = (mockHttpClient.request as any).mock.calls[0][0]
-      expect(callArgs.url).toBe('https://api.example.com/test')
+      expect(callArgs.host).toBe('api.example.com')
+      expect(callArgs.path).toBe('/test')
     })
 
     it('should handle path without leading slash', async () => {
@@ -284,7 +334,7 @@ describe('xMoneyClient', () => {
       })
 
       const callArgs = (mockHttpClient.request as any).mock.calls[0][0]
-      expect(callArgs.url).toBe('https://api-stage.xmoney.com/test')
+      expect(callArgs.path).toBe('/test')
     })
 
     it('should merge custom headers', async () => {

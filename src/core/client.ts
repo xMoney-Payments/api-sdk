@@ -8,9 +8,38 @@ export class XMoneyClient implements XMoneyCore {
   private readonly platformProvider: PlatformProvider
 
   constructor(config: XMoneyConfig | string) {
-    this.config = typeof config === 'string'
-      ? { apiKey: config, host: 'https://api-stage.xmoney.com', timeout: 80000, maxRetries: 3 }
-      : { host: 'https://api-stage.xmoney.com', timeout: 80000, maxRetries: 3, ...config }
+    const defaultConfig: Partial<XMoneyConfig> = {
+      protocol: 'https',
+      host: 'api.xmoney.com',
+      timeout: 80000,
+      maxRetries: 3,
+    }
+
+    if (typeof config === 'string') {
+      this.config = { ...defaultConfig, apiKey: config }
+    }
+    else {
+      let finalConfig = { ...defaultConfig }
+
+      if (config.host && (config.host.startsWith('http://') || config.host.startsWith('https://'))) {
+        const url = new URL(config.host)
+
+        // Apply config but use parsed URL components
+        finalConfig = {
+          ...defaultConfig,
+          ...config,
+          host: url.hostname,
+          protocol: config.protocol ?? url.protocol.replace(':', '') as 'http' | 'https',
+          port: config.port ?? (url.port ? Number(url.port) : undefined),
+        }
+      }
+      else {
+        // No URL parsing needed
+        finalConfig = { ...finalConfig, ...config }
+      }
+
+      this.config = finalConfig as XMoneyConfig
+    }
 
     // HTTP client must be provided
     if (!this.config.httpClient) {
@@ -33,23 +62,26 @@ export class XMoneyClient implements XMoneyCore {
       body: options.body ? DateTransformer.toApi(options.body) : undefined,
     }
 
-    // Build full URL - URL constructor is available in Node.js 10+ and all browsers
-    const baseUrl = this.config.host!.endsWith('/') ? this.config.host!.slice(0, -1) : this.config.host!
-    const path = transformedOptions.path.startsWith('/') ? transformedOptions.path : `/${transformedOptions.path}`
-    const url = new URL(baseUrl + path)
+    // Build path with query parameters
+    let path = transformedOptions.path.startsWith('/') ? transformedOptions.path : `/${transformedOptions.path}`
 
     // Add query parameters
     if (transformedOptions.query) {
+      const params = new URLSearchParams()
       Object.entries(transformedOptions.query).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
           if (Array.isArray(value)) {
-            value.forEach(v => url.searchParams.append(key, String(v)))
+            value.forEach(v => params.append(key, String(v)))
           }
           else {
-            url.searchParams.append(key, String(value))
+            params.append(key, String(value))
           }
         }
       })
+      const queryString = params.toString()
+      if (queryString) {
+        path += `?${queryString}`
+      }
     }
 
     const headers: Record<string, string> = {
@@ -76,7 +108,10 @@ export class XMoneyClient implements XMoneyCore {
       try {
         const response = await this.httpClient.request({
           method: transformedOptions.method,
-          url: url.toString(),
+          protocol: this.config.protocol!,
+          host: this.config.host!,
+          port: this.config.port || (this.config.protocol === 'https' ? 443 : 80),
+          path,
           headers,
           body,
           timeout: this.config.timeout!,
