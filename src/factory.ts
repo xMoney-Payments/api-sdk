@@ -1,6 +1,6 @@
 import type { ApiResponse, RequestOptions, XMoneyConfig } from './types'
 import { XMoneyClient } from './core/client'
-import { CardsResource, CustomersResource, NotificationsResource, OrdersResource, TransactionsResource } from './resources'
+import { CardsResource, CheckoutResource, CustomersResource, NotificationsResource, OrdersResource, TransactionsResource } from './resources'
 
 export interface XMoneySDK {
   customers: CustomersResource
@@ -8,6 +8,7 @@ export interface XMoneySDK {
   transactions: TransactionsResource
   cards: CardsResource
   notifications: NotificationsResource
+  checkout: CheckoutResource
   request: <T>(options: RequestOptions) => Promise<ApiResponse<T>>
 }
 
@@ -36,6 +37,7 @@ export function createXMoneyClientFactory(config: XMoneyConfig | string): XMoney
     transactions: new TransactionsResource(client),
     cards: new CardsResource(client),
     notifications: new NotificationsResource(client),
+    checkout: new CheckoutResource(client, platformProvider),
     request: client.request.bind(client),
   }
 }
