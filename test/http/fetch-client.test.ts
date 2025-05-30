@@ -149,28 +149,46 @@ describe('fetchHttpClient', () => {
         timeout: 100,
       }
 
-      let abortSignal: AbortSignal | null | undefined
+      // Create an abort error that will be thrown
+      const abortError = new Error('The operation was aborted')
+      abortError.name = 'AbortError'
 
+      // Mock fetch to throw when aborted
       mockFetch.mockImplementation((url: string, init: RequestInit) => {
-        abortSignal = init.signal
+        // Return a promise that rejects when abort signal fires
         return new Promise((resolve, reject) => {
+          // If signal is already aborted, reject immediately
+          if (init.signal?.aborted) {
+            reject(abortError)
+            return
+          }
+
+          // Set up abort handler
           init.signal?.addEventListener('abort', () => {
-            reject(new DOMException('The operation was aborted', 'AbortError'))
-          })
-          setTimeout(() => resolve(mockResponse), 200)
+            reject(abortError)
+          }, { once: true })
+
+          // This timeout would resolve after 200ms (longer than abort timeout)
+          // But it will be aborted before then
         })
       })
 
+      // Start the request (don't await yet)
       const requestPromise = client.request(options)
 
-      // Fast-forward timer to trigger timeout
-      await vi.advanceTimersByTimeAsync(100)
+      // Advance time to trigger the timeout
+      vi.advanceTimersByTime(100)
 
-      // Check that abort was called
-      expect(abortSignal?.aborted).toBe(true)
-
-      // The request should reject with abort error
+      // Now the promise should reject
       await expect(requestPromise).rejects.toThrow('abort')
+
+      // Verify fetch was called with abort signal
+      expect(mockFetch).toHaveBeenCalledWith(
+        'https://api.example.com/test',
+        expect.objectContaining({
+          signal: expect.any(AbortSignal),
+        }),
+      )
     })
 
     it('should clear timeout on successful response', async () => {
