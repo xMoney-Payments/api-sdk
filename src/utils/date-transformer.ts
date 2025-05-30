@@ -18,7 +18,7 @@ export class DateTransformer {
   /**
    * Transform dates to strings for API requests
    */
-  static toApi<T extends Record<string, any>>(data: T): T {
+  static toApi<T = any>(data: T): T {
     if (data === null || data === undefined)
       return data
     if (typeof data !== 'object')
@@ -56,16 +56,15 @@ export class DateTransformer {
   /**
    * Transform strings to dates for API responses
    */
-  static fromApi<T extends Record<string, any>>(data: T): T {
+  static fromApi<T = any>(data: T): T {
     if (data === null || data === undefined)
       return data
     if (typeof data !== 'object')
       return data
 
     // Handle arrays
-    if (Array.isArray(data)) {
+    if (Array.isArray(data))
       return data.map(item => this.fromApi(item)) as any
-    }
 
     // Handle regular objects
     const result: any = {}

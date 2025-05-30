@@ -1,6 +1,6 @@
 export interface Tag {
   tag: string
-  creationDate: string
+  creationDate: string // ISO 8601 date-time
   creationTimestamp: number
 }
 
@@ -15,6 +15,28 @@ export type CardType =
   | 'discover'
   | 'mir'
   | 'unionpay'
+
+export type CardProvider =
+  | 'apcopay'
+  | 'argus'
+  | 'billfirst'
+  | 'decta'
+  | 'emerchantpay'
+  | 'epg'
+  | 'firstdata'
+  | 'kalixa'
+  | 'maxpay'
+  | 'nmi'
+  | 'optimal'
+  | 'payon'
+  | 'payone'
+  | 'payvision'
+  | 'postfinance'
+  | 'rocketgate'
+  | 'romcard'
+  | 'safecharge'
+  | 'wirecard'
+  | 'worldline'
 
 export type WalletType =
   | 'neteller'
@@ -42,6 +64,18 @@ export type WalletType =
   | 'verkkopankki'
   | 'bitcoin'
   | 'etherum'
+
+export type WalletProvider =
+  | 'alternativepayments'
+  | 'bitcoinromania'
+  | 'neteller'
+  | 'paypal'
+  | 'paysafecard'
+  | 'skrill'
+  | 'sofort'
+  | 'trustly'
+
+export type WalletBrand = WalletType
 
 export type RefundReason =
   | 'fraud-confirm'

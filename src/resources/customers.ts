@@ -17,13 +17,13 @@ export interface Customer {
   phone: string
   email: string
   isWhitelisted?: number
-  isWhitelistedUntil?: string
-  creationDate: string
+  isWhitelistedUntil?: string // ISO 8601 date-time
+  creationDate: string // ISO 8601 date-time
   creationTimestamp: number
   tags?: Tag[]
 }
 
-export interface CreateCustomerParams {
+export interface CustomerCreateParams {
   identifier: string
   email: string
   siteId?: number
@@ -40,9 +40,9 @@ export interface CreateCustomerParams {
   tag?: string[]
 }
 
-export interface UpdateCustomerParams extends Partial<Omit<CreateCustomerParams, 'siteId'>> {}
+export interface CustomerUpdateParams extends Partial<Omit<CustomerCreateParams, 'siteId'>> {}
 
-export interface ListCustomerParams {
+export interface CustomerListParams {
   searchId?: string
   identifier?: string
   identifierMatchPartial?: 0 | 1
@@ -65,7 +65,7 @@ export interface ListCustomerParams {
 export class CustomersResource {
   constructor(private client: XMoneyCore) {}
 
-  async create(params: CreateCustomerParams): Promise<{ id: number }> {
+  async create(params: CustomerCreateParams): Promise<{ id: number }> {
     const response = await this.client.request<{ id: number }>({
       method: 'POST',
       path: '/customer',
@@ -92,7 +92,7 @@ export class CustomersResource {
     return response.data
   }
 
-  async update(id: number, params: UpdateCustomerParams): Promise<void> {
+  async update(id: number, params: CustomerUpdateParams): Promise<void> {
     await this.client.request({
       method: 'PUT',
       path: `/customer/${id}`,
@@ -107,7 +107,7 @@ export class CustomersResource {
     })
   }
 
-  async list(params?: ListCustomerParams): Promise<PaginatedList<Customer>> {
+  async list(params?: CustomerListParams): Promise<PaginatedList<Customer>> {
     const response = await this.client.request<Customer[]>({
       method: 'GET',
       path: '/customer',
@@ -131,7 +131,7 @@ export class CustomersResource {
     )
   }
 
-  async search(params: Omit<ListCustomerParams, 'searchId' | 'page'>): Promise<SearchResult<Customer>> {
+  async search(params: Omit<CustomerListParams, 'searchId' | 'page'>): Promise<SearchResult<Customer>> {
     const response = await this.client.request<{ searchId: string, url?: string }>({
       method: 'POST',
       path: '/customer-search',

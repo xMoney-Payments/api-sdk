@@ -1,4 +1,4 @@
-import type { Transaction, TransactionStatus, TransactionSummary } from '../../src/resources/transactions'
+import type { Transaction, TransactionListParams, TransactionStatus, TransactionSummary } from '../../src/resources/transactions'
 import type { XMoneyCore } from '../../src/types'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { PaginatedList, SearchResult } from '../../src/core/pagination'
@@ -284,15 +284,15 @@ describe('transactionsResource', () => {
 
   describe('search', () => {
     it('should search transactions', async () => {
-      const searchParams = {
+      const searchParams: TransactionListParams = {
         customerId: 789,
         transactionStatus: ['complete-ok'],
         transactionType: 'credit',
         perPage: 50,
-      } as Parameters<typeof transactionsResource.search>[0]
+      }
 
       mockCore.request = vi.fn().mockResolvedValue({
-        searchId: 'search_trans_456',
+        data: { searchId: 'search_trans_456' },
       })
 
       const result = await transactionsResource.search(searchParams)
@@ -313,7 +313,7 @@ describe('transactionsResource', () => {
       }
 
       mockCore.request = vi.fn()
-        .mockResolvedValueOnce({ searchId: 'search_trans_789' })
+        .mockResolvedValueOnce({ data: { searchId: 'search_trans_789' } })
         .mockResolvedValueOnce({
           data: [mockTransactionSummary],
           pagination: {
@@ -339,15 +339,15 @@ describe('transactionsResource', () => {
     })
 
     it('should handle search with date filters', async () => {
-      const searchParams = {
+      const searchParams: TransactionListParams = {
         createdAtFrom: new Date('2025-01-01'),
         createdAtTo: new Date('2025-12-31'),
         amountFrom: 1000,
         amountTo: 50000,
-      } as Parameters<typeof transactionsResource.search>[0]
+      }
 
       mockCore.request = vi.fn().mockResolvedValue({
-        searchId: 'search_date_amount',
+        data: { searchId: 'search_date_amount' },
       })
 
       await transactionsResource.search(searchParams)
@@ -360,37 +360,37 @@ describe('transactionsResource', () => {
     })
 
     it('should handle all transaction types in search', async () => {
-      const types = ['preauth', 'capture', 'refund', 'void'] as const
+      const transactionTypes = ['deposit', 'credit', 'refund', 'chargeback', 'representment'] as const
 
-      for (const type of types) {
+      for (const transactionType of transactionTypes) {
         mockCore.request = vi.fn().mockResolvedValue({
-          searchId: `search_${type}`,
+          data: { searchId: `search_${transactionType}` },
         })
 
-        await transactionsResource.search({ type })
+        await transactionsResource.search({ transactionType })
 
         expect(mockCore.request).toHaveBeenCalledWith({
           method: 'POST',
           path: '/transaction-search',
-          body: { type },
+          body: { transactionType },
         })
       }
     })
 
     it('should handle all transaction statuses in search', async () => {
-      const statuses = ['pending', 'successful', 'failed', 'cancelled'] as const
+      const transactionStatuses = ['complete-ok', 'cancel-ok', 'refund-ok', 'void-ok', 'charge-back', 'complete-failed', 'in-progress', '3d-pending'] as const
 
-      for (const status of statuses) {
+      for (const transactionStatus of transactionStatuses) {
         mockCore.request = vi.fn().mockResolvedValue({
-          searchId: `search_${status}`,
+          data: { searchId: `search_${transactionStatus}` },
         })
 
-        await transactionsResource.search({ status })
+        await transactionsResource.search({ transactionStatus: [transactionStatus] })
 
         expect(mockCore.request).toHaveBeenCalledWith({
           method: 'POST',
           path: '/transaction-search',
-          body: { status },
+          body: { transactionStatus: [transactionStatus] },
         })
       }
     })

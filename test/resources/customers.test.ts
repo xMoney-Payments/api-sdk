@@ -1,4 +1,4 @@
-import type { CreateCustomerParams, Customer, UpdateCustomerParams } from '../../src/resources/customers'
+import type { Customer, CustomerCreateParams, CustomerUpdateParams } from '../../src/resources/customers'
 import type { XMoneyCore } from '../../src/types'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { PaginatedList, SearchResult } from '../../src/core/pagination'
@@ -10,15 +10,21 @@ describe('customersResource', () => {
 
   const mockCustomer: Customer = {
     id: 123,
-    organisationId: 456,
-    createdAt: new Date('2025-01-01'),
+    siteId: 456,
+    creationDate: `${new Date('2025-01-01').toISOString().slice(0, -5)}+00:00`,
     updatedAt: new Date('2025-01-02'),
     email: 'john.doe@example.com',
     firstName: 'John',
     lastName: 'Doe',
     referenceId: 'ref_123',
     status: 'active',
-    tags: [{ key: 'type', value: 'premium' }],
+    tags: [
+      {
+        tag: 'premium',
+        creationDate: `${new Date('2025-01-01').toISOString().slice(0, -5)}+00:00`,
+        creationTimestamp: new Date('2025-01-01').getTime(),
+      },
+    ],
     hasDefaultCard: true,
     hasOtherCards: true,
     hasSuccessfulTransaction: true,
@@ -37,10 +43,11 @@ describe('customersResource', () => {
 
   describe('create', () => {
     it('should create a customer with required fields', async () => {
-      const params: CreateCustomerParams = {
+      const params: CustomerCreateParams = {
         email: 'test@example.com',
         firstName: 'Test',
         lastName: 'User',
+        identifier: 'ref_456',
       }
 
       mockCore.request = vi.fn().mockResolvedValue({
@@ -58,12 +65,12 @@ describe('customersResource', () => {
     })
 
     it('should create a customer with all fields', async () => {
-      const params: CreateCustomerParams = {
+      const params: CustomerCreateParams = {
         email: 'test@example.com',
         firstName: 'Test',
         lastName: 'User',
-        referenceId: 'ref_456',
-        tags: [{ key: 'source', value: 'web' }],
+        identifier: 'ref_456',
+        tag: ['web'],
       }
 
       mockCore.request = vi.fn().mockResolvedValue({
@@ -112,7 +119,7 @@ describe('customersResource', () => {
 
   describe('update', () => {
     it('should update a customer', async () => {
-      const params: UpdateCustomerParams = {
+      const params: CustomerUpdateParams = {
         email: 'newemail@example.com',
         firstName: 'Jane',
         lastName: 'Smith',
@@ -130,9 +137,9 @@ describe('customersResource', () => {
     })
 
     it('should update with tags', async () => {
-      const params: UpdateCustomerParams = {
-        referenceId: 'new_ref',
-        tags: [{ key: 'status', value: 'vip' }],
+      const params: CustomerUpdateParams = {
+        identifier: 'new_ref',
+        tag: ['vip'],
       }
 
       mockCore.request = vi.fn().mockResolvedValue({})
@@ -250,7 +257,7 @@ describe('customersResource', () => {
       }
 
       mockCore.request = vi.fn().mockResolvedValue({
-        searchId: 'search_456',
+        data: { searchId: 'search_456' },
       })
 
       const result = await customersResource.search(searchParams)
@@ -268,7 +275,7 @@ describe('customersResource', () => {
       const searchParams = { email: 'test@example.com' }
 
       mockCore.request = vi.fn()
-        .mockResolvedValueOnce({ searchId: 'search_789' })
+        .mockResolvedValueOnce({ data: { searchId: 'search_789' } })
         .mockResolvedValueOnce({
           data: [mockCustomer],
           pagination: {
@@ -305,7 +312,7 @@ describe('customersResource', () => {
       }
 
       mockCore.request = vi.fn().mockResolvedValue({
-        searchId: 'search_complex',
+        data: { searchId: 'search_complex' },
       })
 
       await customersResource.search(searchParams)
@@ -326,7 +333,7 @@ describe('customersResource', () => {
       } as any
 
       mockCore.request = vi.fn().mockResolvedValue({
-        searchId: 'search_new',
+        data: { searchId: 'search_new' },
       })
 
       await customersResource.search(invalidParams)

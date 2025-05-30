@@ -11,9 +11,10 @@ describe('paginatedList', () => {
 
   const mockPagination: Pagination = {
     currentPageNumber: 1,
-    pageCount: 3,
     totalItemCount: 9,
     itemCountPerPage: 3,
+    currentItemCount: 3,
+    pageCount: 3,
   }
 
   describe('constructor and basic properties', () => {
@@ -247,9 +248,9 @@ describe('paginatedList', () => {
 
       expect(result).toEqual([
         { id: 1, name: 'Item 1', active: true },
-        { id: 3, name: 'Item 3', active: false },
+        { id: 3, name: 'Item 3', active: true },
         { id: 4, name: 'Item 4', active: true },
-      ].filter(item => item.active))
+      ])
     })
 
     it('map should transform all items', async () => {

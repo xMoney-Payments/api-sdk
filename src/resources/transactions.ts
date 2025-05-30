@@ -1,6 +1,5 @@
-import type { ApiResponse, XMoneyCore } from '../types'
-import type { Card } from './cards'
-import type { CardType, RefundReason, WalletType } from './types'
+import type { ApiResponse, Card, CardProvider, WalletProvider, XMoneyCore } from '../types'
+import type { CardType, RefundReason, WalletBrand } from './types'
 import { XMoneyError } from '../core/error'
 import { PaginatedList, SearchResult } from '../core/pagination'
 
@@ -15,48 +14,10 @@ export type TransactionStatus =
   | 'charge-back'
   | '3d-pending'
 
-export interface Transaction {
-  id: number
-  siteId?: number
-  orderId: number
-  customerId: number
-  transactionType: 'deposit' | 'refund' | 'credit' | 'chargeback' | 'representment'
-  transactionMethod: 'card' | 'wallet' | 'transfer'
-  transactionStatus: TransactionStatus
-  ip: string
-  amount: string
-  currency: string
-  amountInEur: string
-  description: string
-  customerCountry: string
-  creationDate: string
-  creationTimestamp: number
-  transactionSource: 'service-call' | 're-bill' | 're-bill-micro' | 'card-change'
-  parentTransactionId?: number
-  adminId?: number
-  fraudScore?: number
-  relatedTransactionIds?: number[]
-  cardProviderId?: number
-  cardProvider?: string
-  cardProviderName?: string
-  cardHolderName?: string
-  cardHolderCountry?: string
-  cardHolderState?: string
-  cardType?: string
-  cardNumber?: string
-  cardExpiryDate?: string
-  email?: string
-  cardId?: number
-  backUrl?: string
-  cardDescriptor?: string
-  card?: Card
-  components?: TransactionComponent[]
-}
-
 export interface TransactionComponent {
   componentId: number
   componentType: string
-  componentDate: string
+  componentDate: string // ISO 8601 date-time
   componentTimestamp: number
   providerIntRef?: string
   providerRc?: string
@@ -70,7 +31,49 @@ export interface TransactionComponent {
   data?: Record<string, any>
 }
 
-export interface ListTransactionParams {
+export interface TransactionSummary {
+  id: number
+  siteId?: number
+  orderId: number
+  customerId: number
+  transactionType: 'deposit' | 'refund' | 'credit' | 'chargeback' | 'representment'
+  transactionMethod: 'card' | 'wallet' | 'transfer'
+  transactionStatus: TransactionStatus
+  ip: string
+  amount: string
+  currency: string
+  amountInEur: string
+  description: string
+  customerCountry: string
+  creationDate: string // ISO 8601 date-time
+  creationTimestamp: number
+  transactionSource: 'service-call' | 're-bill' | 're-bill-micro' | 'card-change'
+  adminId?: number
+  fraudScore?: number
+  cardProviderId?: number
+  cardProvider?: string
+  cardProviderName?: string
+  cardHolderName?: string
+  cardHolderCountry?: string
+  cardHolderState?: string
+  cardType?: string
+  cardNumber?: string
+  cardExpiryDate?: string
+  email?: string
+  cardId?: number
+  backUrl?: string
+  externalCustomData?: string
+  cardDescriptor?: string
+}
+
+export interface Transaction extends TransactionSummary {
+  parentTransactionId?: number
+  relatedTransactionIds?: number[]
+  card?: Card
+  components?: TransactionComponent[]
+}
+
+export interface TransactionListParams {
   searchId?: string
   parentResourceType?: 'partner' | 'merchant' | 'site'
   parentResourceId?: number[]
@@ -84,8 +87,8 @@ export interface ListTransactionParams {
   transactionType?: 'deposit' | 'refund' | 'credit' | 'chargeback' | 'representment'
   transactionStatus?: TransactionStatus[]
   dateType?: 'creation' | 'approval' | 'refund' | 'cancellation' | 'charge-back'
-  createdAtFrom?: Date
-  createdAtTo?: Date
+  createdAtFrom?: string
+  createdAtTo?: string
   greaterThanId?: number
   source?: Array<'service-call' | 're-bill' | 're-bill-micro' | 'card-change'>
   ip?: string
@@ -95,20 +98,29 @@ export interface ListTransactionParams {
   page?: number
   perPage?: number
   reverseSorting?: 0 | 1
-  cardProvider?: string
+  cardProvider?: CardProvider
   cardType?: CardType
   cardNumber?: string
   cardHolderName?: string
   country?: string
   state?: string
-  walletProvider?: string
-  walletBrand?: WalletType
+  walletProvider?: WalletProvider
+  walletBrand?: WalletBrand
   walletHolderName?: string
   walletHolderEmail?: string
   initialTransactionId?: number
 }
 
-export interface TransactionSummary extends Omit<Transaction, 'parentTransactionId' | 'relatedTransactionIds' | 'card' | 'components'> {}
+export interface TransactionCaptureParams {
+  amount: number
+}
+
+export interface TransactionRefundParams {
+  reason?: RefundReason
+  message?: string
+  amount?: number
+  transactionOption?: string
+}
 
 export class TransactionsResource {
   constructor(private client: XMoneyCore) {}
@@ -126,20 +138,15 @@ export class TransactionsResource {
     return response.data
   }
 
-  async capture(id: number, amount: number): Promise<void> {
+  async capture(id: number, params: TransactionCaptureParams): Promise<void> {
     await this.client.request({
       method: 'PUT',
       path: `/transaction/${id}`,
-      body: { amount },
+      body: params,
     })
   }
 
-  async refund(id: number, params?: {
-    reason?: RefundReason
-    message?: string
-    amount?: number
-    transactionOption?: string
-  }): Promise<void> {
+  async refund(id: number, params?: TransactionRefundParams): Promise<void> {
     await this.client.request({
       method: 'DELETE',
       path: `/transaction/${id}`,
@@ -147,7 +154,7 @@ export class TransactionsResource {
     })
   }
 
-  async list(params?: ListTransactionParams): Promise<PaginatedList<TransactionSummary>> {
+  async list(params?: TransactionListParams): Promise<PaginatedList<TransactionSummary>> {
     const response = await this.client.request<TransactionSummary[]>({
       method: 'GET',
       path: '/transaction',
@@ -171,7 +178,7 @@ export class TransactionsResource {
     )
   }
 
-  async search(params: Omit<ListTransactionParams, 'searchId' | 'page'>): Promise<SearchResult<TransactionSummary>> {
+  async search(params: Omit<TransactionListParams, 'searchId' | 'page'>): Promise<SearchResult<TransactionSummary>> {
     const response = await this.client.request<{ searchId: string, url?: string }>({
       method: 'POST',
       path: '/transaction-search',

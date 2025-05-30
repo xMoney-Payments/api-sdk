@@ -1,16 +1,6 @@
 import type { ApiResponse, XMoneyCore } from '../types'
 import { PaginatedList } from '../core/pagination'
 
-export interface Notification {
-  id: number
-  siteId: number
-  resourceId: number
-  resourceType: 'order' | 'transaction'
-  message: NotificationMessage
-  creationDate: string
-  creationTimestamp: number
-}
-
 export type NotificationMessage =
   | 'orderNew'
   | 'orderChange'
@@ -29,22 +19,34 @@ export type NotificationMessage =
   | 'transaction3D'
   | 'receiptSend'
 
+export interface Notification {
+  id: number
+  siteId: number
+  resourceId: number
+  resourceType: 'order' | 'transaction'
+  message: NotificationMessage
+  creationDate: string // ISO 8601 date-time
+  creationTimestamp: number
+}
+
+export interface NotificationListParams {
+  searchId?: string
+  parentResourceType?: 'partner' | 'merchant' | 'site'
+  parentResourceId?: number[]
+  greaterThanId?: number
+  resourceId?: number
+  resourceType?: 'order' | 'transaction'
+  message?: NotificationMessage[]
+  occurredAtFrom?: string
+  occurredAtTo?: string
+  page?: number
+  perPage?: number
+}
+
 export class NotificationsResource {
   constructor(private client: XMoneyCore) {}
 
-  async list(params?: {
-    searchId?: string
-    parentResourceType?: 'partner' | 'merchant' | 'site'
-    parentResourceId?: number[]
-    greaterThanId?: number
-    resourceId?: number
-    resourceType?: 'order' | 'transaction'
-    message?: NotificationMessage[]
-    occurredAtFrom?: string
-    occurredAtTo?: string
-    page?: number
-    perPage?: number
-  }): Promise<PaginatedList<Notification>> {
+  async list(params?: NotificationListParams): Promise<PaginatedList<Notification>> {
     const response = await this.client.request<Notification[]>({
       method: 'GET',
       path: '/notification',

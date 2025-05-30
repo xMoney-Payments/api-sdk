@@ -29,7 +29,7 @@ describe('createXMoneyClientFactory', () => {
 
   describe('factory creation', () => {
     it('should create SDK with string API key', () => {
-      const config = { apiKey: 'test-api-key', platformProvider: mockPlatformProvider }
+      const config = { apiKey: 'test-api-key', httpClient: mockHttpClient, platformProvider: mockPlatformProvider }
       const sdk = createXMoneyClientFactory(config)
 
       expect(sdk).toBeDefined()
@@ -48,6 +48,7 @@ describe('createXMoneyClientFactory', () => {
         timeout: 5000,
         maxRetries: 5,
         secureToken: 'secure-123',
+        httpClient: mockHttpClient,
         platformProvider: mockPlatformProvider,
       }
 
@@ -64,6 +65,7 @@ describe('createXMoneyClientFactory', () => {
     it('should pass HTTP client to the SDK', () => {
       const config: XMoneyConfig = {
         apiKey: 'test-api-key',
+        httpClient: mockHttpClient,
         platformProvider: mockPlatformProvider,
       }
 
@@ -92,6 +94,7 @@ describe('createXMoneyClientFactory', () => {
     it('should bind request method to client instance', async () => {
       const config: XMoneyConfig = {
         apiKey: 'test-api-key',
+        httpClient: mockHttpClient,
         platformProvider: mockPlatformProvider,
       }
 
@@ -130,6 +133,7 @@ describe('createXMoneyClientFactory', () => {
     it('should handle request errors', async () => {
       const config: XMoneyConfig = {
         apiKey: 'test-api-key',
+        httpClient: mockHttpClient,
         platformProvider: mockPlatformProvider,
       }
 
@@ -149,6 +153,7 @@ describe('createXMoneyClientFactory', () => {
       const config: XMoneyConfig = {
         apiKey: 'test-api-key',
         host: 'https://api.example.com',
+        httpClient: mockHttpClient,
         platformProvider: mockPlatformProvider,
       }
 
@@ -180,7 +185,7 @@ describe('createXMoneyClientFactory', () => {
 
   describe('configuration merging', () => {
     it('should merge string config with defaults', () => {
-      const sdk = createXMoneyClientFactory('api-key-123', mockHttpClient, mockPlatformProvider)
+      const sdk = createXMoneyClientFactory({ apiKey: 'api-key-123', httpClient: mockHttpClient, platformProvider: mockPlatformProvider })
 
       // Test that default configuration is applied
       mockHttpClient.request = vi.fn().mockResolvedValue({
@@ -214,6 +219,7 @@ describe('createXMoneyClientFactory', () => {
         host: 'https://custom.host.com',
         timeout: 10000,
         maxRetries: 10,
+        httpClient: mockHttpClient,
         platformProvider: mockPlatformProvider,
       }
 
@@ -250,6 +256,7 @@ describe('createXMoneyClientFactory', () => {
       const config: XMoneyConfig = {
         apiKey: 'test-key',
         secureToken: 'secure-token-123',
+        httpClient: mockHttpClient,
         platformProvider: mockPlatformProvider,
       }
 
@@ -281,7 +288,7 @@ describe('createXMoneyClientFactory', () => {
 
   describe('sDK interface', () => {
     it('should implement the complete XMoneySDK interface', () => {
-      const sdk = createXMoneyClientFactory('test-key')
+      const sdk = createXMoneyClientFactory({ apiKey: 'test-key', httpClient: mockHttpClient, platformProvider: mockPlatformProvider })
 
       // Check that all required properties exist
       expect(sdk).toHaveProperty('customers')

@@ -22,8 +22,13 @@ describe('fetchHttpClient', () => {
     })
 
     it('should throw error if no fetch function available', () => {
-      expect(() => new FetchHttpClient(undefined as any))
+      const originalFetch = globalThis.fetch
+      delete (globalThis as any).fetch
+
+      expect(() => new FetchHttpClient())
         .toThrow('Fetch is not available. Please provide a fetch implementation or use NodeHttpClient.')
+
+      globalThis.fetch = originalFetch
     })
 
     it('should use global fetch if available', () => {
@@ -144,7 +149,7 @@ describe('fetchHttpClient', () => {
         timeout: 100,
       }
 
-      let abortSignal: AbortSignal | undefined
+      let abortSignal: AbortSignal | null | undefined
 
       mockFetch.mockImplementation((url: string, init: RequestInit) => {
         abortSignal = init.signal

@@ -27,6 +27,17 @@ export interface BinInfo {
   bank?: string
 }
 
+export interface CardListParams {
+  searchId?: string
+  customerId?: number
+  orderId?: number
+  hasToken?: 'yes' | 'no'
+  cardStatus?: 'all' | 'deleted'
+  page?: number
+  perPage?: number
+  reverseSorting?: 0 | 1
+}
+
 export class CardsResource {
   constructor(private client: XMoneyCore) {}
 
@@ -51,16 +62,7 @@ export class CardsResource {
     })
   }
 
-  async list(params?: {
-    searchId?: string
-    customerId?: number
-    orderId?: number
-    hasToken?: 'yes' | 'no'
-    cardStatus?: 'all' | 'deleted'
-    page?: number
-    perPage?: number
-    reverseSorting?: 0 | 1
-  }): Promise<PaginatedList<Card>> {
+  async list(params?: CardListParams): Promise<PaginatedList<Card>> {
     const response = await this.client.request<Card[]>({
       method: 'GET',
       path: '/card',

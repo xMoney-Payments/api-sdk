@@ -1,4 +1,4 @@
-import type { CreateOrderParams, CreateOrderResponse, Order } from '../../src/resources/orders'
+import type { CreateOrderResponse, Order, OrderCreateParams, OrderListParams, OrderRebillParams, OrderUpdateCardParams } from '../../src/resources/orders'
 import type { XMoneyCore } from '../../src/types'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { PaginatedList, SearchResult } from '../../src/core/pagination'
@@ -11,7 +11,7 @@ describe('ordersResource', () => {
   const mockOrder: Order = {
     id: 12345,
     siteId: 456,
-    createdAt: new Date('2025-01-01'),
+    createdAt: `${new Date('2025-01-01').toISOString().slice(0, -5)}+00:00`,
     updatedAt: new Date('2025-01-01'),
     orderId: 'order_12345',
     externalOrderId: 'ref_12345',
@@ -93,16 +93,18 @@ describe('ordersResource', () => {
 
   describe('create', () => {
     it('should create an order with required fields', async () => {
-      const params: CreateOrderParams = {
+      const params: OrderCreateParams = {
+        customerId: 789,
+        ip: '127.0.0.1',
         amount: 5000,
         currency: 'USD',
-        referenceId: 'ref_new_order',
+        orderType: 'purchase',
+        externalOrderId: 'ref_new_order',
       }
 
       const mockResponse: CreateOrderResponse = {
-        id: 54321,
+        orderId: 54321,
         transactionId: 2001,
-        status: 'pending',
       }
 
       mockCore.request = vi.fn().mockResolvedValue({
@@ -120,28 +122,23 @@ describe('ordersResource', () => {
     })
 
     it('should create an order with all fields', async () => {
-      const params: CreateOrderParams = {
+      const params: OrderCreateParams = {
         amount: 10000,
         currency: 'EUR',
-        referenceId: 'ref_full_order',
-        type: 'recurring',
+        externalOrderId: 'ref_full_order',
+        orderType: 'recurring',
         customerId: 789,
-        email: 'customer@example.com',
-        firstName: 'Jane',
-        lastName: 'Smith',
-        cardId: 111,
-        customerIp: '10.0.0.1',
+        invoiceEmail: 'customer@example.com',
+        cardHolderName: 'Jane Smith',
+        cardId: '111',
+        ip: '10.0.0.1',
         saveCard: true,
-        updateCard: false,
-        verifyCard: true,
-        tags: [{ key: 'campaign', value: 'summer2025' }],
-        metadata: { orderId: 'internal_123' },
+        externalCustomData: JSON.stringify({ orderId: 'internal_123' }),
       }
 
       const mockResponse: CreateOrderResponse = {
-        id: 99999,
+        orderId: 99999,
         transactionId: 3001,
-        status: 'successful',
         cardId: 222,
       }
 
@@ -206,16 +203,18 @@ describe('ordersResource', () => {
       mockCore.request = vi.fn().mockResolvedValue({})
 
       await ordersResource.cancel('order_12345', {
-        amount: 5000,
         reason: 'fraud-confirm',
+        message: 'Suspicious activity detected',
+        terminateOrder: 'yes',
       })
 
       expect(mockCore.request).toHaveBeenCalledWith({
         method: 'DELETE',
         path: '/order/order_12345',
         body: {
-          amount: 5000,
           reason: 'fraud-confirm',
+          message: 'Suspicious activity detected',
+          terminateOrder: 'yes',
         },
       })
     })
@@ -223,11 +222,32 @@ describe('ordersResource', () => {
 
   describe('rebill', () => {
     it('should rebill an order', async () => {
-      const params = {
+      const params: OrderRebillParams = {
+        customerId: 789,
         amount: 7500,
-        currency: 'USD',
-        referenceId: 'rebill_ref_123',
-        customerIp: '192.168.1.2',
+        transactionOption: JSON.stringify({
+          digitalWallet: {
+            walletType: 'googlePay',
+            data: 'eyJtZXNzYWdlSWQiOiJBUEEwMV8xMjM0NTY3ODkwIiwiZW5jcnlwdGVkTWVzc2FnZSI6InNvbWVFbmNyeXB0ZWREYXRhIn0=',
+          },
+          isSoftDecline: 'yes',
+          splitPayment: {
+            splitSchema: [
+              {
+                toSite: 1001,
+                amount: 150.50,
+                description: 'Payment for merchant A',
+                tag: ['electronics', 'online-store', 'premium'],
+              },
+              {
+                toSite: 1002,
+                amount: 49.99,
+                description: 'Payment for merchant B',
+                tag: ['books', 'education'],
+              },
+            ],
+          },
+        }),
       }
 
       const mockResponse = {
@@ -251,10 +271,9 @@ describe('ordersResource', () => {
     })
 
     it('should rebill with minimal parameters', async () => {
-      const params = {
+      const params: OrderRebillParams = {
+        customerId: 789,
         amount: 2000,
-        currency: 'GBP',
-        referenceId: 'rebill_min',
       }
 
       mockCore.request = vi.fn().mockResolvedValue({
@@ -273,10 +292,20 @@ describe('ordersResource', () => {
 
   describe('updateCard', () => {
     it('should update card for an order', async () => {
-      const params = {
-        cardId: 444,
-        customerIp: '10.0.0.2',
-        tags: [{ key: 'update', value: 'card_change' }],
+      const params: OrderUpdateCardParams = {
+        customerId: 789,
+        ip: '10.0.0.1',
+        amount: 6000,
+        currency: 'USD',
+        cardNumber: '4111111111111111',
+        cardExpiryDate: '01/99',
+        cardCvv: '123',
+        transactionDescription: 'Order update card',
+        cardHolderName: 'Alice Johnson',
+        cardHolderCountry: 'US',
+        cardHolderState: 'CA',
+        cardType: 'visa',
+        cardDescriptor: 'Order Update',
       }
 
       const mockResponse = {
@@ -300,8 +329,14 @@ describe('ordersResource', () => {
     })
 
     it('should update card with minimal parameters', async () => {
-      const params = {
-        cardId: 555,
+      const params: OrderUpdateCardParams = {
+        customerId: 789,
+        ip: '10.0.0.1',
+        amount: 3000,
+        currency: 'USD',
+        cardNumber: '4111111111111111',
+        cardExpiryDate: '01/99',
+        cardCvv: '123',
       }
 
       mockCore.request = vi.fn().mockResolvedValue({
@@ -388,7 +423,7 @@ describe('ordersResource', () => {
       }
 
       mockCore.request = vi.fn().mockResolvedValue({
-        searchId: 'search_orders_456',
+        data: { searchId: 'search_orders_456' },
       })
 
       const result = await ordersResource.search(searchParams)
@@ -406,7 +441,7 @@ describe('ordersResource', () => {
       const searchParams = { externalOrderId: 'ref_pattern' }
 
       mockCore.request = vi.fn()
-        .mockResolvedValueOnce({ searchId: 'search_orders_789' })
+        .mockResolvedValueOnce({ data: { searchId: 'search_orders_789' } })
         .mockResolvedValueOnce({
           data: [mockOrder],
           pagination: {
@@ -432,14 +467,14 @@ describe('ordersResource', () => {
     })
 
     it('should handle search with date filters', async () => {
-      const searchParams = {
+      const searchParams: OrderListParams = {
         createdAtFrom: new Date('2025-01-01'),
         createdAtTo: new Date('2025-12-31'),
         tag: 'seasonal',
-      } as Parameters<typeof ordersResource.search>[0]
+      }
 
       mockCore.request = vi.fn().mockResolvedValue({
-        searchId: 'search_date_range',
+        data: { searchId: 'search_date_range' },
       })
 
       await ordersResource.search(searchParams)

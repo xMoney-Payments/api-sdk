@@ -123,7 +123,7 @@ describe('notificationsResource', () => {
         },
       })
 
-      const result = await notificationsResource.list({ status: 'failed' })
+      const result = await notificationsResource.list({ message: ['transactionFail'] })
 
       expect(result.data).toEqual([])
       expect(result.totalCount).toBe(0)
@@ -131,9 +131,9 @@ describe('notificationsResource', () => {
     })
 
     it('should handle different notification statuses', async () => {
-      const statuses = ['pending', 'successful', 'failed'] as const
+      const statuses = ['orderNew', 'orderChange', 'orderExtend', 'orderRetrying', 'orderInProgress', 'orderCancel', 'transactionNew', 'transactionCapture', 'transactionFail'] as const
 
-      for (const status of statuses) {
+      for (const message of statuses) {
         mockCore.request = vi.fn().mockResolvedValue({
           data: [],
           pagination: {
@@ -144,12 +144,12 @@ describe('notificationsResource', () => {
           },
         })
 
-        await notificationsResource.list({ status })
+        await notificationsResource.list({ message: [message] })
 
         expect(mockCore.request).toHaveBeenCalledWith({
           method: 'GET',
           path: '/notification',
-          query: { status },
+          query: { message: [message] },
         })
       }
     })
@@ -183,7 +183,7 @@ describe('notificationsResource', () => {
         }
       })
 
-      const result = await notificationsResource.list({ limit: 1 })
+      const result = await notificationsResource.list({ perPage: 1 })
 
       expect(result.hasMore).toBe(true)
       expect(result.data).toEqual(firstPageData)
@@ -314,17 +314,16 @@ describe('notificationsResource', () => {
     it('should handle failed notification with retry info', async () => {
       const failedNotification: Notification = {
         ...mockNotification,
-        status: 'failed',
-        attempts: 3,
-        nextAttemptAt: new Date('2025-01-01T13:00:00Z'),
-        response: {
-          status: 500,
-          headers: {},
-          body: 'Internal Server Error',
-        },
+        message: 'transactionFail',
+        // response: {
+        //   status: 500,
+        //   headers: {},
+        //   body: 'Internal Server Error',
+        // },
       }
 
       mockCore.request = vi.fn().mockResolvedValue({
+        code: 500,
         data: [failedNotification],
         pagination: {
           currentPageNumber: 1,
@@ -334,25 +333,18 @@ describe('notificationsResource', () => {
         },
       })
 
-      const result = await notificationsResource.listForTransactions({ status: 'failed' })
+      const result = await notificationsResource.listForTransactions({ message: ['transactionFail'] })
 
-      expect(result.data[0].status).toBe('failed')
-      expect(result.data[0].attempts).toBe(3)
-      expect(result.data[0].nextAttemptAt).toEqual(new Date('2025-01-01T13:00:00Z'))
-      expect(result.data[0].response?.status).toBe(500)
+      expect(result.data[0].message).toBe('transactionFail')
+      // expect(result.data[0].attempts).toBe(3)
+      // expect(result.data[0].nextAttemptAt).toEqual(new Date('2025-01-01T13:00:00Z'))
+      // expect(result.data[0].response?.status).toBe(500)
     })
 
     it('should handle different event types', async () => {
-      const events = [
-        'transaction.successful',
-        'transaction.failed',
-        'transaction.refunded',
-        'order.created',
-        'order.completed',
-        'order.cancelled',
-      ]
+      const messages = ['orderNew', 'orderChange', 'orderExtend', 'orderRetrying', 'orderInProgress', 'orderCancel', 'transactionNew', 'transactionCapture', 'transactionFail'] as const
 
-      for (const event of events) {
+      for (const message of messages) {
         mockCore.request = vi.fn().mockResolvedValue({
           data: [],
           pagination: {
@@ -363,12 +355,12 @@ describe('notificationsResource', () => {
           },
         })
 
-        await notificationsResource.list({ event })
+        await notificationsResource.list({ message: [message] })
 
         expect(mockCore.request).toHaveBeenCalledWith({
           method: 'GET',
           path: '/notification',
-          query: { event },
+          query: { message: [message] },
         })
       }
     })

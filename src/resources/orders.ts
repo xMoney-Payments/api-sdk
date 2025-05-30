@@ -1,5 +1,5 @@
-import type { ApiResponse, XMoneyCore } from '../types'
-import type { CardType, RefundReason, Tag, WalletType } from './types'
+import type { ApiResponse, RefundReason, XMoneyCore } from '../types'
+import type { CardType, Tag, WalletType } from './types'
 import { XMoneyError } from '../core/error'
 import { PaginatedList, SearchResult } from '../core/pagination'
 
@@ -14,16 +14,16 @@ export interface Order {
   currency?: string
   description?: string
   invoiceEmail?: string
-  createdAt?: string
+  createdAt?: string // ISO 8601 date-time
   intervalType?: 'day' | 'month'
   intervalValue?: number
   retryPayment?: string
-  nextDueDate?: string
+  nextDueDate?: string // ISO 8601 date-time
   transactionMethod?: string
   tags?: Tag[]
 }
 
-export interface CreateOrderParams {
+export interface OrderCreateParams {
   siteId?: number
   customerId: number
   ip: string
@@ -76,7 +76,7 @@ export interface CreateOrderResponse {
   }
 }
 
-export interface ListOrderParams {
+export interface OrderListParams {
   searchId?: string
   parentResourceType?: 'partner' | 'merchant' | 'site'
   parentResourceId?: number[]
@@ -93,10 +93,42 @@ export interface ListOrderParams {
   reverseSorting?: 0 | 1
 }
 
+export interface OrderRebillParams {
+  customerId: number
+  amount: number
+  /**
+   * Json encoded param used to pass optional flags.
+   * Validate against https://api-stage.xmoney.com/schema/transactionOption.schema.json
+   */
+  transactionOption?: string
+}
+
+export interface OrderUpdateCardParams {
+  customerId: string
+  ip: string
+  amount: number
+  currency: string
+  transactionDescription?: string
+  cardHolderName?: string
+  cardHolderCountry?: string
+  cardHolderState?: string
+  cardType?: CardType
+  cardNumber: string
+  cardExpiryDate: string
+  cardCvv: string
+  cardDescriptor?: string
+}
+
+export interface OrderCancelParams {
+  reason?: 'fraud-confirm' | 'highly-suspicious' | 'duplicated-transaction' | 'customer-demand' | 'test-transaction'
+  message?: string
+  terminateOrder?: 'yes'
+}
+
 export class OrdersResource {
   constructor(private client: XMoneyCore) {}
 
-  async create(params: CreateOrderParams): Promise<CreateOrderResponse> {
+  async create(params: OrderCreateParams): Promise<CreateOrderResponse> {
     const response = await this.client.request<CreateOrderResponse>({
       method: 'POST',
       path: '/order',
@@ -125,11 +157,7 @@ export class OrdersResource {
     return response.data
   }
 
-  async cancel(id: string | number, params?: {
-    reason?: 'fraud-confirm' | 'highly-suspicious' | 'duplicated-transaction' | 'customer-demand' | 'test-transaction'
-    message?: string
-    terminateOrder?: 'yes'
-  }): Promise<void> {
+  async cancel(id: string | number, params?: OrderCancelParams): Promise<void> {
     await this.client.request({
       method: 'DELETE',
       path: `/order/${id}`,
@@ -137,11 +165,7 @@ export class OrdersResource {
     })
   }
 
-  async rebill(id: string | number, params: {
-    customerId: number
-    amount: number
-    transactionOption?: string
-  }): Promise<{ id: number, transactionId?: number, cardId?: number }> {
+  async rebill(id: string | number, params: OrderRebillParams): Promise<{ id: number, transactionId?: number, cardId?: number }> {
     const response = await this.client.request<{ id: number, transactionId?: number, cardId?: number }>({
       method: 'PATCH',
       path: `/order-rebill/${id}`,
@@ -155,21 +179,7 @@ export class OrdersResource {
     return response.data
   }
 
-  async updateCard(orderId: string | number, params: {
-    customerId: string | number
-    ip: string
-    amount: number
-    currency: string
-    transactionDescription?: string
-    cardHolderName?: string
-    cardHolderCountry?: string
-    cardHolderState?: string
-    cardType?: CardType
-    cardNumber: string
-    cardExpiryDate: string
-    cardCvv: string
-    cardDescriptor?: string
-  }): Promise<{ id: number, transactionId?: number, cardId?: number }> {
+  async updateCard(orderId: string | number, params: OrderUpdateCardParams): Promise<{ id: number, transactionId?: number, cardId?: number }> {
     const response = await this.client.request<{ id: number, transactionId?: number, cardId?: number }>({
       method: 'PATCH',
       path: `/order-update-card/${orderId}`,
@@ -183,7 +193,7 @@ export class OrdersResource {
     return response.data
   }
 
-  async list(params?: ListOrderParams): Promise<PaginatedList<Order>> {
+  async list(params?: OrderListParams): Promise<PaginatedList<Order>> {
     const response = await this.client.request<Order[]>({
       method: 'GET',
       path: '/order',
@@ -207,7 +217,7 @@ export class OrdersResource {
     )
   }
 
-  async search(params: Omit<ListOrderParams, 'searchId' | 'page'>): Promise<SearchResult<Order>> {
+  async search(params: Omit<OrderListParams, 'searchId' | 'page'>): Promise<SearchResult<Order>> {
     const response = await this.client.request<{ searchId: string, url?: string }>({
       method: 'POST',
       path: '/order-search',
