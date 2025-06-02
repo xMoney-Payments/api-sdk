@@ -113,7 +113,7 @@ export interface NotificationListParams {
  *
  * @example
  * ```typescript
- * const xMoney = createXMoney({ apiKey: 'your-api-key' })
+ * const xMoney = createXMoneyClient({ apiKey: 'your-api-key' })
  *
  * // List all notifications
  * const notifications = await xMoney.notifications.list({

@@ -223,7 +223,7 @@ export interface CustomerListParams {
  *
  * @example
  * ```typescript
- * const xMoney = createXMoney({ apiKey: 'your-api-key' })
+ * const xMoney = createXMoneyClient({ apiKey: 'your-api-key' })
  *
  * // Create a customer
  * const { id } = await xMoney.customers.create({
@@ -366,7 +366,7 @@ export class CustomersResource {
    *   country: 'US',
    *   createdAtFrom: new Date('2024-01-01')
    * })
-   * const results = await search.getResults()
+   * const results = await search.fetch()
    * ```
    */
   async search(params: Omit<CustomerListParams, 'searchId' | 'page'>): Promise<SearchResult<Customer>> {

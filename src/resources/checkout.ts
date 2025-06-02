@@ -216,7 +216,7 @@ export interface CheckoutResponse {
  *
  * @example
  * ```typescript
- * const xMoney = createXMoney({ apiKey: 'your-api-key' })
+ * const xMoney = createXMoneyClient({ apiKey: 'your-api-key' })
  *
  * // Create checkout session
  * const { payload, checksum } = xMoney.checkout.create({
@@ -232,7 +232,8 @@ export interface CheckoutResponse {
  *     amount: 99.99,
  *     currency: 'USD',
  *     description: 'Product purchase'
- *   }
+ *   },
+ *   cardTransactionMode: 'authAndCapture'
  * })
  * ```
  */

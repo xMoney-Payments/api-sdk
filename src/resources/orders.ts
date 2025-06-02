@@ -448,7 +448,7 @@ export interface OrderCancelParams {
  *
  * @example
  * ```typescript
- * const xMoney = createXMoney({ apiKey: 'your-api-key' })
+ * const xMoney = createXMoneyClient({ apiKey: 'your-api-key' })
  *
  * // Create a one-time purchase
  * const order = await xMoney.orders.create({
@@ -624,7 +624,7 @@ export class OrdersResource {
    *   createdAtFrom: new Date('2024-01-01'),
    *   orderType: 'recurring'
    * })
-   * const results = await search.getResults()
+   * const results = await search.fetch()
    * ```
    */
   async search(params: Omit<OrderListParams, 'searchId' | 'page'>): Promise<SearchResult<Order>> {

@@ -417,7 +417,7 @@ export interface TransactionRefundParams {
  *
  * @example
  * ```typescript
- * const xMoney = createXMoney({ apiKey: 'your-api-key' })
+ * const xMoney = createXMoneyClient({ apiKey: 'your-api-key' })
  *
  * // Get transaction details
  * const transaction = await xMoney.transactions.retrieve(12345)
@@ -535,7 +535,7 @@ export class TransactionsResource {
    *   amountTo: 1000,
    *   transactionType: 'deposit'
    * })
-   * const results = await search.getResults()
+   * const results = await search.fetch()
    * ```
    */
   async search(params: Omit<TransactionListParams, 'searchId' | 'page'>): Promise<SearchResult<TransactionSummary>> {

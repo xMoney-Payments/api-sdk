@@ -136,7 +136,7 @@ export interface CardListParams {
  *
  * @example
  * ```typescript
- * const xMoney = createXMoney({
+ * const xMoney = createXMoneyClient({
  *   apiKey: 'your-api-key',
  *   secureToken: 'your-secure-token'
  * })
