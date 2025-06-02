@@ -1,6 +1,9 @@
 import type { ApiResponse, XMoneyCore } from '../types'
-import { PaginatedList } from '../core/pagination'
+import { PaginatedList } from '../core'
 
+/**
+ * Notification message types for webhook events
+ */
 export type NotificationMessage =
   | 'orderNew'
   | 'orderChange'
@@ -19,33 +22,120 @@ export type NotificationMessage =
   | 'transaction3D'
   | 'receiptSend'
 
+/**
+ * Webhook notification record
+ */
 export interface Notification {
+  /**
+   * Notification ID
+   */
   id: number
+  /**
+   * Site ID
+   */
   siteId: number
+  /**
+   * ID of the resource (order or transaction)
+   */
   resourceId: number
+  /**
+   * Type of resource
+   */
   resourceType: 'order' | 'transaction'
+  /**
+   * Notification message type
+   */
   message: NotificationMessage
-  creationDate: string // ISO 8601 date-time
+  /**
+   * ISO 8601 date-time when notification was created
+   */
+  creationDate: string
+  /**
+   * Unix timestamp of creation
+   */
   creationTimestamp: number
 }
 
+/**
+ * Parameters for listing notifications
+ */
 export interface NotificationListParams {
+  /**
+   * Search ID from previous search
+   */
   searchId?: string
+  /**
+   * Filter by parent resource type
+   */
   parentResourceType?: 'partner' | 'merchant' | 'site'
+  /**
+   * Filter by parent resource IDs
+   */
   parentResourceId?: number[]
+  /**
+   * Filter notifications with ID greater than
+   */
   greaterThanId?: number
+  /**
+   * Filter by resource ID
+   */
   resourceId?: number
+  /**
+   * Filter by resource type
+   */
   resourceType?: 'order' | 'transaction'
+  /**
+   * Filter by notification message types
+   */
   message?: NotificationMessage[]
+  /**
+   * Filter by occurrence date from
+   */
   occurredAtFrom?: string
+  /**
+   * Filter by occurrence date to
+   */
   occurredAtTo?: string
+  /**
+   * Page number
+   */
   page?: number
+  /**
+   * Items per page
+   */
   perPage?: number
 }
 
+/**
+ * Resource for managing webhook notifications
+ *
+ * Use to retrieve notification history for orders and transactions
+ *
+ * @example
+ * ```typescript
+ * const xMoney = createXMoney({ apiKey: 'your-api-key' })
+ *
+ * // List all notifications
+ * const notifications = await xMoney.notifications.list({
+ *   greaterThanId: lastProcessedId
+ * })
+ *
+ * // Process new notifications
+ * for await (const notification of notifications) {
+ *   if (notification.message === 'transactionNew') {
+ *     // Handle new transaction
+ *   }
+ * }
+ * ```
+ */
 export class NotificationsResource {
   constructor(private client: XMoneyCore) {}
 
+  /**
+   * List all notifications
+   * @param params - List parameters
+   * @returns Paginated list of notifications
+   */
   async list(params?: NotificationListParams): Promise<PaginatedList<Notification>> {
     const response = await this.client.request<Notification[]>({
       method: 'GET',
@@ -70,6 +160,19 @@ export class NotificationsResource {
     )
   }
 
+  /**
+   * List notifications for orders only
+   * @param params - List parameters
+   * @returns Paginated list of order notifications
+   *
+   * @example
+   * ```typescript
+   * const orderNotifications = await xMoney.notifications.listForOrders({
+   *   message: ['orderNew', 'orderChange'],
+   *   occurredAtFrom: '2024-01-01T00:00:00Z'
+   * })
+   * ```
+   */
   async listForOrders(params?: {
     parentResourceType?: 'partner' | 'merchant' | 'site'
     parentResourceId?: number[]
@@ -103,6 +206,19 @@ export class NotificationsResource {
     )
   }
 
+  /**
+   * List notifications for transactions only
+   * @param params - List parameters
+   * @returns Paginated list of transaction notifications
+   *
+   * @example
+   * ```typescript
+   * const txNotifications = await xMoney.notifications.listForTransactions({
+   *   message: ['transactionNew', 'transactionFail'],
+   *   greaterThanId: lastId
+   * })
+   * ```
+   */
   async listForTransactions(params?: {
     parentResourceType?: 'partner' | 'merchant' | 'site'
     parentResourceId?: number[]

@@ -1,9 +1,24 @@
+/**
+ * Tag information for categorizing resources
+ */
 export interface Tag {
+  /**
+   * Tag identifier
+   */
   tag: string
-  creationDate: string // ISO 8601 date-time
+  /**
+   * ISO 8601 date-time when the tag was created
+   */
+  creationDate: string
+  /**
+   * Unix timestamp of tag creation
+   */
   creationTimestamp: number
 }
 
+/**
+ * Supported credit/debit card types
+ */
 export type CardType =
   | 'visa'
   | 'mastercard'
@@ -16,6 +31,9 @@ export type CardType =
   | 'mir'
   | 'unionpay'
 
+/**
+ * Supported card payment providers
+ */
 export type CardProvider =
   | 'apcopay'
   | 'argus'
@@ -38,6 +56,9 @@ export type CardProvider =
   | 'wirecard'
   | 'worldline'
 
+/**
+ * Supported wallet and alternative payment methods
+ */
 export type WalletType =
   | 'neteller'
   | 'paypal'
@@ -65,6 +86,9 @@ export type WalletType =
   | 'bitcoin'
   | 'etherum'
 
+/**
+ * Supported wallet payment providers
+ */
 export type WalletProvider =
   | 'alternativepayments'
   | 'bitcoinromania'
@@ -75,8 +99,14 @@ export type WalletProvider =
   | 'sofort'
   | 'trustly'
 
+/**
+ * Alias for WalletType for backward compatibility
+ */
 export type WalletBrand = WalletType
 
+/**
+ * Reasons for transaction refunds
+ */
 export type RefundReason =
   | 'fraud-confirm'
   | 'highly-suspicious'

@@ -1,5 +1,14 @@
+/**
+ * Utility class for transforming dates between JavaScript Date objects
+ * and XMoney API date string format
+ *
+ * Handles automatic conversion of date fields in API requests and responses
+ */
 export class DateTransformer {
-  // List of fields that should be treated as dates
+  /**
+   * Set of field names that should be treated as dates
+   * @private
+   */
   private static readonly DATE_FIELDS = new Set([
     'createdAt',
     'createdAtFrom',
@@ -16,7 +25,24 @@ export class DateTransformer {
   ])
 
   /**
-   * Transform dates to strings for API requests
+   * Transform Date objects to ISO 8601 strings for API requests
+   *
+   * Converts JavaScript Date objects to the format expected by XMoney API:
+   * "YYYY-MM-DDTHH:mm:ss+00:00"
+   *
+   * @template T - Type of the data
+   * @param data - Data containing potential Date objects
+   * @returns Data with Date objects converted to strings
+   *
+   * @example
+   * ```typescript
+   * const params = {
+   *   createdAtFrom: new Date('2024-01-01'),
+   *   customerId: 123
+   * }
+   * const apiParams = DateTransformer.toApi(params)
+   * // Result: { createdAtFrom: '2024-01-01T00:00:00+00:00', customerId: 123 }
+   * ```
    */
   static toApi<T = any>(data: T): T {
     if (data === null || data === undefined)
@@ -54,7 +80,24 @@ export class DateTransformer {
   }
 
   /**
-   * Transform strings to dates for API responses
+   * Transform date strings from API responses to JavaScript Date objects
+   *
+   * Automatically converts known date fields from string format to Date objects
+   * for easier manipulation in JavaScript
+   *
+   * @template T - Type of the data
+   * @param data - Data from API containing date strings
+   * @returns Data with date strings converted to Date objects
+   *
+   * @example
+   * ```typescript
+   * const apiResponse = {
+   *   id: 123,
+   *   creationDate: '2024-01-01T12:00:00+00:00'
+   * }
+   * const transformed = DateTransformer.fromApi(apiResponse)
+   * // Result: { id: 123, creationDate: Date object }
+   * ```
    */
   static fromApi<T = any>(data: T): T {
     if (data === null || data === undefined)
@@ -86,7 +129,12 @@ export class DateTransformer {
   }
 
   /**
-   * Check if a field should be converted to a Date
+   * Check if a field should be converted to a Date object
+   *
+   * @param key - Field name to check
+   * @param value - Field value to validate
+   * @returns True if the field should be converted to Date
+   * @private
    */
   private static shouldConvertToDate(key: string, value: any): boolean {
     if (!this.DATE_FIELDS.has(key))

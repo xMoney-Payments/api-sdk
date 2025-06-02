@@ -1,18 +1,53 @@
 import type { ApiResponse, RequestOptions, XMoneyConfig } from './types'
-import { XMoneyClient } from './core/client'
+import { XMoneyClient } from './core'
 import { CardsResource, CheckoutResource, CustomersResource, NotificationsResource, OrdersResource, TransactionsResource } from './resources'
 
+/**
+ * Main SDK interface providing access to all XMoney resources
+ */
 export interface XMoneySDK {
+  /**
+   * Customer management operations
+   */
   customers: CustomersResource
+  /**
+   * Order management operations
+   */
   orders: OrdersResource
+  /**
+   * Transaction management operations
+   */
   transactions: TransactionsResource
+  /**
+   * Card management operations
+   */
   cards: CardsResource
+  /**
+   * Notification webhook management
+   */
   notifications: NotificationsResource
+  /**
+   * Checkout payment request operations
+   */
   checkout: CheckoutResource
+  /**
+   * Direct API request method for custom endpoints
+   * @param options - Request configuration
+   * @returns API response
+   */
   request: <T>(options: RequestOptions) => Promise<ApiResponse<T>>
 }
 
-// Internal factory used by all entry points
+/**
+ * Internal factory function for creating XMoney SDK instances
+ * Used by platform-specific entry points (Node.js and Web)
+ *
+ * @param config - Configuration object or API key string
+ * @returns XMoney SDK instance with all resources
+ * @throws {Error} If httpClient or platformProvider is not provided
+ *
+ * @internal
+ */
 export function createXMoneyClientFactory(config: XMoneyConfig | string): XMoneySDK {
   const finalConfig = typeof config === 'string'
     ? { apiKey: config }

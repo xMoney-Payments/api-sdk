@@ -2,11 +2,48 @@ import type { ApiResponse, HttpClient, PlatformProvider, RequestOptions, XMoneyC
 import { DateTransformer } from '../utils'
 import { XMoneyError } from './error'
 
+/**
+ * Core client for interacting with the XMoney Payment Gateway API
+ *
+ * This client handles:
+ * - Authentication with API key
+ * - Request retry logic with exponential backoff
+ * - Form-encoded request bodies
+ * - Date transformation for API compatibility
+ * - Platform-specific HTTP and crypto operations
+ */
 export class XMoneyClient implements XMoneyCore {
+  /**
+   * Client configuration (read-only)
+   */
   readonly config: Readonly<XMoneyConfig>
+  /**
+   * Platform-specific HTTP client for making requests
+   */
   private readonly httpClient: HttpClient
+  /**
+   * Platform-specific provider for crypto operations
+   */
   private readonly platformProvider: PlatformProvider
 
+  /**
+   * Create a new XMoney client instance
+   * @param config - Configuration object or API key string
+   * @throws {Error} If HTTP client or platform provider is not provided
+   *
+   * @example
+   * ```typescript
+   * // With API key only
+   * const client = new XMoneyClient('your-api-key')
+   *
+   * // With full configuration
+   * const client = new XMoneyClient({
+   *   apiKey: 'your-api-key',
+   *   host: 'api.xmoney.com',
+   *   maxRetries: 5
+   * })
+   * ```
+   */
   constructor(config: XMoneyConfig | string) {
     const defaultConfig: Partial<XMoneyConfig> = {
       protocol: 'https',
@@ -54,6 +91,20 @@ export class XMoneyClient implements XMoneyCore {
     this.platformProvider = this.config.platformProvider
   }
 
+  /**
+   * Make an authenticated request to the XMoney API
+   *
+   * @template T - Expected response data type
+   * @param options - Request configuration
+   * @returns Promise resolving to the API response
+   * @throws {XMoneyError} If the request fails or returns an error response
+   *
+   * Features:
+   * - Automatic retry with exponential backoff for server errors (5xx)
+   * - Form-encoded request bodies for POST/PUT/PATCH/DELETE
+   * - Date serialization to API format
+   * - Query parameter handling with array support
+   */
   async request<T>(options: RequestOptions): Promise<ApiResponse<T>> {
     // Transform dates in query and body parameters
     const transformedOptions = {
@@ -149,6 +200,16 @@ export class XMoneyClient implements XMoneyCore {
     throw lastError!
   }
 
+  /**
+   * Encode data as application/x-www-form-urlencoded
+   *
+   * Supports nested objects and arrays using bracket notation:
+   * - Objects: `parent[child]=value`
+   * - Arrays: `parent[]=value1&parent[]=value2`
+   *
+   * @param data - Data to encode
+   * @returns Form-encoded string
+   */
   private encodeFormData(data: Record<string, any>): string {
     // Note: URLSearchParams is available in Node.js 10+ and all modern browsers
     // For older environments, a polyfill may be needed
