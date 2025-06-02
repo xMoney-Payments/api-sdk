@@ -10,18 +10,23 @@ export class DateTransformer {
    * @private
    */
   private static readonly DATE_FIELDS = new Set([
+    'componentDate',
     'createdAt',
     'createdAtFrom',
     'createdAtTo',
     'creationDate',
-    'updatedAt',
     'deletedAt',
-    'expiryDate',
-    'componentDate',
-    'cardExpiryDate',
     'dueDate',
-    'startDate',
     'endDate',
+    'firstBillDate',
+    'isWhitelistedUntil',
+    'isWhitelistedUntilFrom',
+    'isWhitelistedUntilTo',
+    'nextDueDate',
+    'occurredAtFrom',
+    'occurredAtTo',
+    'startDate',
+    'updatedAt',
   ])
 
   /**

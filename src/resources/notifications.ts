@@ -91,11 +91,11 @@ export interface NotificationListParams {
   /**
    * Filter by occurrence date from
    */
-  occurredAtFrom?: string
+  occurredAtFrom?: Date
   /**
    * Filter by occurrence date to
    */
-  occurredAtTo?: string
+  occurredAtTo?: Date
   /**
    * Page number
    */
@@ -103,6 +103,34 @@ export interface NotificationListParams {
   /**
    * Items per page
    */
+  perPage?: number
+}
+
+/**
+ * Parameters for listing order-specific notifications
+ */
+export interface OrderNotificationListParams {
+  parentResourceType?: 'partner' | 'merchant' | 'site'
+  parentResourceId?: number[]
+  greaterThanId?: number
+  message?: Array<'orderNew' | 'orderChange' | 'orderExtend' | 'orderRetrying' | 'orderInProgress' | 'orderCancel'>
+  occurredAtFrom?: Date
+  occurredAtTo?: Date
+  page?: number
+  perPage?: number
+}
+
+/**
+ * Parameters for listing transaction-specific notifications
+ */
+export interface TransactionNotificationListParams {
+  parentResourceType?: 'partner' | 'merchant' | 'site'
+  parentResourceId?: number[]
+  greaterThanId?: number
+  message?: Array<'transactionNew' | 'transactionCapture' | 'transactionFail' | 'transactionRefund' | 'transactionCancel' | 'transactionVoid' | 'transactionChargeBack' | 'transaction3D' | 'transactionCredit' | 'receiptSend'>
+  occurredAtFrom?: Date
+  occurredAtTo?: Date
+  page?: number
   perPage?: number
 }
 
@@ -173,16 +201,7 @@ export class NotificationsResource {
    * })
    * ```
    */
-  async listForOrders(params?: {
-    parentResourceType?: 'partner' | 'merchant' | 'site'
-    parentResourceId?: number[]
-    greaterThanId?: number
-    message?: Array<'orderNew' | 'orderChange' | 'orderExtend' | 'orderRetrying' | 'orderInProgress' | 'orderCancel'>
-    occurredAtFrom?: string
-    occurredAtTo?: string
-    page?: number
-    perPage?: number
-  }): Promise<PaginatedList<Notification>> {
+  async listForOrders(params?: OrderNotificationListParams): Promise<PaginatedList<Notification>> {
     const response = await this.client.request<Notification[]>({
       method: 'GET',
       path: '/notification-for-order',
@@ -219,16 +238,7 @@ export class NotificationsResource {
    * })
    * ```
    */
-  async listForTransactions(params?: {
-    parentResourceType?: 'partner' | 'merchant' | 'site'
-    parentResourceId?: number[]
-    greaterThanId?: number
-    message?: Array<'transactionNew' | 'transactionCapture' | 'transactionFail' | 'transactionRefund' | 'transactionCancel' | 'transactionVoid' | 'transactionChargeBack' | 'transaction3D' | 'transactionCredit' | 'receiptSend'>
-    occurredAtFrom?: string
-    occurredAtTo?: string
-    page?: number
-    perPage?: number
-  }): Promise<PaginatedList<Notification>> {
+  async listForTransactions(params?: TransactionNotificationListParams): Promise<PaginatedList<Notification>> {
     const response = await this.client.request<Notification[]>({
       method: 'GET',
       path: '/notification-for-transaction',
