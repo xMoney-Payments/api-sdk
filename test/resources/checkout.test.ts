@@ -266,10 +266,18 @@ describe('checkoutResource', () => {
       // Mock the decryption to return valid JSON
       const expectedResponse: CheckoutResponse = {
         orderId: 12345,
+        customerId: 54321,
+        identifier: 'cust_123',
         transactionId: 67890,
-        status: 'complete-ok',
+        transactionStatus: 'complete-ok',
         amount: 10000,
         currency: 'USD',
+        externalOrderId: 'ext-order-123',
+        transactionMethod: 'card',
+        customData: null,
+        customFields: null,
+        timestamp: 0,
+        cardId: undefined,
       }
 
       mockPlatform.buffer.concat = vi.fn(() =>
@@ -293,11 +301,17 @@ describe('checkoutResource', () => {
       const expectedResponse: CheckoutResponse = {
         orderId: 12345,
         transactionId: 67890,
-        status: 'complete-ok',
+        transactionStatus: 'complete-ok',
         amount: 10000,
         currency: 'USD',
-        customField: 'custom-value',
-        metadata: { key: 'value' },
+        externalOrderId: '',
+        transactionMethod: '',
+        customerId: 0,
+        identifier: '',
+        customData: { key: 'value' },
+        customFields: { customField: 'custom-value' },
+        timestamp: 0,
+        cardId: undefined,
       }
 
       mockPlatform.buffer.concat = vi.fn(() =>
@@ -307,8 +321,8 @@ describe('checkoutResource', () => {
       const result = checkoutResource.decrypt(encryptedResponse)
 
       expect(result).toEqual(expectedResponse)
-      expect(result.customField).toBe('custom-value')
-      expect(result.metadata).toEqual({ key: 'value' })
+      expect(result.customFields).toStrictEqual(expectedResponse.customFields)
+      expect(result.customData).toEqual({ key: 'value' })
     })
 
     it('should throw error for invalid format (missing comma)', () => {
@@ -439,12 +453,17 @@ describe('checkoutResource', () => {
       const mockResponse: CheckoutResponse = {
         orderId: 98765,
         transactionId: 54321,
-        status: 'complete-ok',
+        transactionStatus: 'complete-ok',
         amount: 25000,
         currency: 'GBP',
-        cardType: 'Visa',
-        cardLastDigits: '1234',
         customerId: 12345,
+        externalOrderId: 'ext-ord-98765',
+        transactionMethod: 'card',
+        identifier: 'customer_12345',
+        customData: null,
+        customFields: null,
+        timestamp: 0,
+        cardId: undefined,
       }
 
       mockPlatform.buffer.concat = vi.fn(() =>
@@ -454,7 +473,7 @@ describe('checkoutResource', () => {
       const encryptedResponse = 'mock-iv-base64,mock-encrypted-base64'
       const decryptedResponse = checkoutResource.decrypt(encryptedResponse)
 
-      expect(decryptedResponse.status).toBe('complete-ok')
+      expect(decryptedResponse.transactionStatus).toBe('complete-ok')
       expect(decryptedResponse.transactionId).toBe(54321)
     })
 
