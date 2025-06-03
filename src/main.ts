@@ -6,8 +6,6 @@ import {
   OrderInputSavedCardDto,
   OrderOutputDto,
   SaveCardInputDto,
-  xMoneyApiErrorDto,
-  xMoneyApiResponseDto,
   xMoneyOrderDecryptResponseDto,
   xMoneyOrderResponseDataDto,
 } from './typings/dtos';
@@ -42,13 +40,13 @@ export default class xMoney {
     return this.cardService.saveCard(input);
   }
 
-  public getCards(customerId: number): Promise<ApiResponseDto<CardDto[], xMoneyApiErrorDto[]>> {
+  public getCards(customerId: number): Promise<ApiResponseDto<CardDto[]>> {
     return this.cardService.getCards(customerId);
   }
 
   public initializeCheckoutWithSavedCard(
     input: OrderInputSavedCardDto,
-  ): Promise<xMoneyApiResponseDto<xMoneyOrderResponseDataDto | xMoneyApiErrorDto>> {
+  ): Promise<ApiResponseDto<xMoneyOrderResponseDataDto>> {
     return this.orderService.createOrderWithSavedCard(input);
   }
 }

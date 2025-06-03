@@ -3,7 +3,6 @@ import {
   ApiResponseDto,
   OrderOutputDto,
   SaveCardInputDto,
-  xMoneyApiErrorDto,
   xMoneyCardResponseDto,
   xMoneyOrder,
 } from '../typings/dtos';
@@ -46,12 +45,20 @@ export class CardService {
 
   public async getCards(
     xMoneyCustomerId: number,
-  ): Promise<ApiResponseDto<xMoneyCardResponseDto[], xMoneyApiErrorDto[]>> {
-    const cardsResponse =  await this.xMoneyApiService.getCardsByxMoneyCustomerId(xMoneyCustomerId);
-    const uniqueCards = [...new Map((cardsResponse?.data || []).map(item =>
-      [item['cardNumber'], item])).values()];
+  ): Promise<ApiResponseDto<xMoneyCardResponseDto[]>> {
+    const cardsResponse = await this.xMoneyApiService.getCardsByxMoneyCustomerId(xMoneyCustomerId);
+
+    if (cardsResponse.error) {
+      throw new Error(
+        cardsResponse.error?.length ? cardsResponse.error[0].message : 'Unknown error',
+      );
+    }
+
+    const uniqueCards = [
+      ...new Map((cardsResponse?.data || []).map((item) => [item['cardNumber'], item])).values(),
+    ];
 
     cardsResponse.data = uniqueCards;
-    return cardsResponse;
+    return { data: cardsResponse.data };
   }
 }

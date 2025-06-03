@@ -11,6 +11,7 @@ import {
 
 export class CommonService {
   public secretKey: string;
+  public verbose: boolean;
   private secretKeyEnv: string | null;
 
   public hostedCheckoutRedirectUrl: { [key: string]: string } = {
@@ -26,6 +27,7 @@ export class CommonService {
   public constructor(initParams: InitInputDto) {
     this.secretKey = this.extractKeyFromSecretKey(initParams.secretKey);
     this.secretKeyEnv = this.extractEnvFromSecretKey(initParams.secretKey);
+    this.verbose = initParams.verbose ?? false;
   }
 
   public getPublicKey(input: OrderInputDto | SaveCardInputDto): string {

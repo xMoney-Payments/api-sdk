@@ -3,12 +3,10 @@ import {
   xMoneyApiResponseDto,
   xMoneyCardResponseDto,
   xMoneyApiErrorDto,
-  ApiResponseDto,
   OrderInputSavedCardDto,
   xMoneyOrderResponseDataDto,
 } from '../typings/dtos';
-import { xMoneyResponseCodeEnum } from '../typings/enums';
-import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
+import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { CommonService } from './common.service';
 
 export class xMoneyApiService {
@@ -19,20 +17,15 @@ export class xMoneyApiService {
 
   async getCardsByxMoneyCustomerId(
     xMoneyCustomerId: number,
-  ): Promise<ApiResponseDto<xMoneyCardResponseDto[], xMoneyApiErrorDto[]>> {
+  ): Promise<xMoneyApiResponseDto<xMoneyCardResponseDto[]>> {
     let baseQueryParams = `customerId=${xMoneyCustomerId}&hasToken=yes`;
-
 
     // Return only the last saved card for now
     const response = await this.get<xMoneyApiResponseDto<xMoneyCardResponseDto[]>>(
       `card?${baseQueryParams}`,
     );
 
-    if (!response?.data || response.data.code !== xMoneyResponseCodeEnum.Success) {
-      return { error: response?.data.error };
-    }
-
-    return { data: response.data.data };
+    return response.data;
   }
 
   async createOrder(
@@ -62,18 +55,14 @@ export class xMoneyApiService {
   private async get<T = never, R = AxiosResponse<T>>(
     url: string,
     config?: AxiosRequestConfig,
-  ): Promise<R | undefined> {
+  ): Promise<R> {
     try {
       return await axios.get(url, {
         ...config,
         ...this.getConfig(),
       });
     } catch (error: any) {
-      console.error('An error occurred while calling Twispay API Route', {
-        route: url,
-        params: config?.params,
-        error: error,
-      });
+      this.logErrorIfNeeded(error, url);
       return error?.response;
     }
   }
@@ -89,12 +78,26 @@ export class xMoneyApiService {
         ...this.getConfig(),
       });
     } catch (error: any) {
-      console.error('An error occurred while calling Twispay API Route', {
-        route: url,
-        params: config?.params,
-        error: error,
-      });
+      this.logErrorIfNeeded(error, url);
       return error?.response;
     }
+  }
+
+  private stringifyError(error: AxiosError<unknown, xMoneyApiErrorDto>): string {
+    if (typeof error?.response?.data === 'object') {
+      return JSON.stringify(error?.response?.data);
+    }
+    return error?.response?.data as string;
+  }
+
+  private logErrorIfNeeded(error: AxiosError<unknown, xMoneyApiErrorDto>, url: string): void {
+    if (!this.commonService.verbose) {
+      return;
+    }
+
+    console.error('An error occurred while calling Twispay API Route', {
+      route: url,
+      error: this.stringifyError(error),
+    });
   }
 }

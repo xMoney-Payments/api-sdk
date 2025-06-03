@@ -1,4 +1,3 @@
-export class ApiResponseDto<T, E> {
+export class ApiResponseDto<T> {
   data?: T;
-  error?: E;
 }

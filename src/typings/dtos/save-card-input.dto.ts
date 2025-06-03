@@ -16,4 +16,5 @@ export class SaveCardInputDto {
     orderId: string;
     description: string;
   };
+  customData?: string;
 }

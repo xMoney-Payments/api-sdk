@@ -1,10 +1,9 @@
 import * as crypto from 'crypto';
 import { OrderInputDto } from '../typings/dtos/order-input.dto';
 import {
+  ApiResponseDto,
   OrderInputSavedCardDto,
   OrderOutputDto,
-  xMoneyApiErrorDto,
-  xMoneyApiResponseDto,
   xMoneyOrder,
   xMoneyOrderDecryptResponseDto,
   xMoneyOrderResponseDataDto,
@@ -61,7 +60,7 @@ export class OrderService {
   public async createOrderWithSavedCard(
     orderInput: OrderInputSavedCardDto,
     iteration = 0,
-  ): Promise<xMoneyApiResponseDto<xMoneyOrderResponseDataDto | xMoneyApiErrorDto>> {
+  ): Promise<ApiResponseDto<xMoneyOrderResponseDataDto>> {
     // Allow maximum 2 recursive calls
     if (iteration === 2) {
       throw new Error('Maximum iterations limit exceeded for create order')
@@ -89,7 +88,7 @@ export class OrderService {
       return await this.createOrderWithSavedCard(softDeclineInput, ++iteration);
     } else {
       // if error code is not soft decline, return error
-      return order;
+      throw new Error(order.error?.length ? order.error[0].message : 'Unknown error');
     }
   }
 

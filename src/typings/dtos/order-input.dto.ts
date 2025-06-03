@@ -5,6 +5,7 @@ export class OrderInputDto {
   saveCard?: boolean;
   cardId?: number;
   backUrl: string;
+  customData?: string;
   customer: {
     identifier: string;
     firstName?: string;
