@@ -20,9 +20,8 @@ export class xMoneyApiService {
 
   async getCardsByxMoneyCustomerId(
     xMoneyCustomerId: number,
-    options?: { skipPagination?: boolean; reverseSorting?: boolean },
   ): Promise<ApiResponseDto<xMoneyCardResponseDto[], xMoneyApiErrorDto[]>> {
-    let baseQueryParams = `customerId=${xMoneyCustomerId}&reverseSorting=${!options?.reverseSorting ? '0' : '1'}${!options?.skipPagination ? '&perPage=1' : ''}`;
+    let baseQueryParams = `customerId=${xMoneyCustomerId}`;
 
     // if prod environment add extra argument
     if (this.commonService.getSecretKeyEnv() == LIVE_ENV) {
