@@ -63,7 +63,7 @@ export class OrderService {
   ): Promise<ApiResponseDto<xMoneyOrderResponseDataDto>> {
     // Allow maximum 2 recursive calls
     if (iteration === 2) {
-      throw new Error('Maximum iterations limit exceeded for create order')
+      throw new Error('Maximum iterations limit exceeded for create order');
     }
 
     const order = await this.apiService.createOrder(orderInput);
@@ -73,7 +73,7 @@ export class OrderService {
       (order.code === xMoneyResponseCodeEnum.Success ||
         order.code === xMoneyResponseCodeEnum.Created)
     ) {
-      return order;
+      return { data: order.data };
     }
 
     // if error code is soft decline, we can try again
