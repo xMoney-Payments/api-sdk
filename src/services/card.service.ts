@@ -47,6 +47,11 @@ export class CardService {
   public async getCards(
     xMoneyCustomerId: number,
   ): Promise<ApiResponseDto<xMoneyCardResponseDto[], xMoneyApiErrorDto[]>> {
-    return await this.xMoneyApiService.getCardsByxMoneyCustomerId(xMoneyCustomerId);
+    const cardsResponse =  await this.xMoneyApiService.getCardsByxMoneyCustomerId(xMoneyCustomerId);
+    const uniqueCards = [...new Map((cardsResponse?.data || []).map(item =>
+      [item['cardNumber'], item])).values()];
+
+    cardsResponse.data = uniqueCards;
+    return cardsResponse;
   }
 }

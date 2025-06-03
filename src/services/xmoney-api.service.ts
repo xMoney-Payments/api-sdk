@@ -10,7 +10,6 @@ import {
 import { xMoneyResponseCodeEnum } from '../typings/enums';
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { CommonService } from './common.service';
-import { LIVE_ENV } from '../typings/constants';
 
 export class xMoneyApiService {
   private commonService: CommonService;
@@ -21,12 +20,8 @@ export class xMoneyApiService {
   async getCardsByxMoneyCustomerId(
     xMoneyCustomerId: number,
   ): Promise<ApiResponseDto<xMoneyCardResponseDto[], xMoneyApiErrorDto[]>> {
-    let baseQueryParams = `customerId=${xMoneyCustomerId}`;
+    let baseQueryParams = `customerId=${xMoneyCustomerId}&hasToken=yes`;
 
-    // if prod environment add extra argument
-    if (this.commonService.getSecretKeyEnv() == LIVE_ENV) {
-      baseQueryParams += '&hasToken=yes';
-    }
 
     // Return only the last saved card for now
     const response = await this.get<xMoneyApiResponseDto<xMoneyCardResponseDto[]>>(
