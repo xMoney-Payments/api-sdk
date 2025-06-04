@@ -1,18 +1,27 @@
 import {
+  ApiResponseDto,
+  CardDto,
   InitInputDto,
   OrderInputDto,
+  OrderInputSavedCardDto,
   OrderOutputDto,
+  SaveCardInputDto,
   xMoneyOrderDecryptResponseDto,
+  xMoneyOrderResponseDataDto,
 } from './typings/dtos';
 import { OrderService } from './services/order.service';
+import { CardService } from './services/card.service';
+import { CommonService } from './services/common.service';
 
 export default class xMoney {
+  private commonService: CommonService;
   private orderService: OrderService;
+  private cardService: CardService;
 
   constructor(initParams: InitInputDto) {
-    this.orderService = new OrderService(
-      initParams.secretKey,
-    );
+    this.commonService = new CommonService(initParams);
+    this.orderService = new OrderService(this.commonService);
+    this.cardService = new CardService(this.commonService);
   }
 
   public initializeCheckout(input: OrderInputDto): OrderOutputDto {
@@ -25,5 +34,19 @@ export default class xMoney {
 
   public decryptOrderResponse(input: string): xMoneyOrderDecryptResponseDto {
     return this.orderService.decryptOrderResponse(input);
+  }
+
+  public initializeCardSave(input: SaveCardInputDto): OrderOutputDto {
+    return this.cardService.saveCard(input);
+  }
+
+  public getCards(customerId: number): Promise<ApiResponseDto<CardDto[]>> {
+    return this.cardService.getCards(customerId);
+  }
+
+  public initializeCheckoutWithSavedCard(
+    input: OrderInputSavedCardDto,
+  ): Promise<ApiResponseDto<xMoneyOrderResponseDataDto>> {
+    return this.orderService.createOrderWithSavedCard(input);
   }
 }

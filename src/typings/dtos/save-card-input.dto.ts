@@ -1,11 +1,7 @@
-export class OrderInputDto {
+export class SaveCardInputDto {
   publicKey: string;
-  cardTransactionMode: "auth" | "authAndCapture" | "credit";
   invoiceEmail?: string;
-  saveCard?: boolean;
-  cardId?: number;
   backUrl: string;
-  customData?: string;
   customer: {
     identifier: string;
     firstName?: string;
@@ -18,9 +14,7 @@ export class OrderInputDto {
   };
   order: {
     orderId: string;
-    type: "purchase" | "recurring" | "managed" | "credit";
-    amount: number;
-    currency: string;
     description: string;
   };
+  customData?: string;
 }
