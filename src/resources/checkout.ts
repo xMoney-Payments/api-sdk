@@ -30,6 +30,10 @@ export interface PaymentRequest {
    */
   backUrl: string
   /**
+   * Custom data from order
+   */
+  customData?: string
+  /**
    * Customer information
    */
   customer: {
@@ -176,7 +180,7 @@ export interface CheckoutResponse {
   /**
    * Custom data from order
    */
-  customData: { [key: string]: string } | null
+  customData: string | null
   /**
    * Custom fields from order
    */
@@ -271,7 +275,6 @@ export class CheckoutResource {
     const uint8Array = this.platform.buffer.from(jsonText, 'utf8')
     const payload = this.platform.buffer.toString(uint8Array, 'base64')
     const checksum = this.generateChecksum(data)
-    // const url = this.buildCheckoutUrl(payload, checksum)
 
     return { payload, checksum }
   }
