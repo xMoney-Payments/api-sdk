@@ -4,13 +4,16 @@ import {
   ApiResponseDto,
   OrderInputSavedCardDto,
   OrderOutputDto,
+  xMoneyCardResponseDto,
+  xMoneyCreateOrderResponseDataDto,
+  xMoneyGetOrderResponseDataDto,
   xMoneyOrder,
   xMoneyOrderDecryptResponseDto,
-  xMoneyOrderResponseDataDto,
 } from '../typings/dtos';
 import { CommonService } from './common.service';
 import { xMoneyApiService } from './xmoney-api.service';
-import { xMoneyResponseCodeEnum } from '../typings/enums';
+import { ThemeEnum, xMoneyResponseCodeEnum } from '../typings/enums';
+import { createOrderWithHtmlPageString } from '../utils/create-order-with-html-page';
 
 export class OrderService {
   private commonService: CommonService;
@@ -57,10 +60,38 @@ export class OrderService {
     </script>`;
   }
 
+  public createOrderWithHtmlPage(
+    orderInput: OrderInputDto,
+    cards: xMoneyCardResponseDto[] = [],
+    theme: ThemeEnum,
+  ): string {
+    const order = this.createOrder(orderInput);
+
+    return createOrderWithHtmlPageString(
+      orderInput.publicKey,
+      order.payload,
+      order.checksum,
+      JSON.stringify(cards),
+      theme,
+    );
+  }
+
+  public async getOrderById(
+    orderId: string,
+  ): Promise<ApiResponseDto<xMoneyGetOrderResponseDataDto>> {
+    const orders = await this.apiService.getOrdersByExternalId(orderId);
+    if (!orders?.data?.[0]) {
+      throw new Error('Order not found');
+    }
+    return {
+      data: orders.data ? orders.data[0] : undefined,
+    };
+  }
+
   public async createOrderWithSavedCard(
     orderInput: OrderInputSavedCardDto,
     iteration = 0,
-  ): Promise<ApiResponseDto<xMoneyOrderResponseDataDto>> {
+  ): Promise<ApiResponseDto<xMoneyCreateOrderResponseDataDto>> {
     // Allow maximum 2 recursive calls
     if (iteration === 2) {
       throw new Error('Maximum iterations limit exceeded for create order');

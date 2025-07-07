@@ -4,7 +4,8 @@ import {
   xMoneyCardResponseDto,
   xMoneyApiErrorDto,
   OrderInputSavedCardDto,
-  xMoneyOrderResponseDataDto,
+  xMoneyCreateOrderResponseDataDto,
+  xMoneyGetOrderResponseDataDto,
 } from '../typings/dtos';
 import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { CommonService } from './common.service';
@@ -30,8 +31,8 @@ export class xMoneyApiService {
 
   async createOrder(
     order: OrderInputSavedCardDto,
-  ): Promise<xMoneyApiResponseDto<xMoneyOrderResponseDataDto>> {
-    const response = await this.post<string, xMoneyApiResponseDto<xMoneyOrderResponseDataDto>>(
+  ): Promise<xMoneyApiResponseDto<xMoneyCreateOrderResponseDataDto>> {
+    const response = await this.post<string, xMoneyApiResponseDto<xMoneyCreateOrderResponseDataDto>>(
       'order',
       qs.stringify(order),
       {
@@ -39,6 +40,15 @@ export class xMoneyApiService {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
       },
+    );
+    return response.data;
+  }
+
+  async getOrdersByExternalId(
+    externalId: string,
+  ): Promise<xMoneyApiResponseDto<xMoneyGetOrderResponseDataDto[]>> {
+    const response = await this.get<xMoneyApiResponseDto<xMoneyGetOrderResponseDataDto[]>>(
+    `order?page=0&perPage=1&externalOrderId=${externalId}`
     );
     return response.data;
   }

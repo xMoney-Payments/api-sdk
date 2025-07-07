@@ -6,3 +6,4 @@ export * from './save-card-input.dto';
 export * from './api-response.dto';
 export * from './order-input-saved-card.dto';
 export * from './card.dto';
+export * from './order-details.dto';
