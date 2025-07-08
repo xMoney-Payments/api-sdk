@@ -7,11 +7,14 @@ import {
   OrderOutputDto,
   SaveCardInputDto,
   xMoneyOrderDecryptResponseDto,
-  xMoneyOrderResponseDataDto,
+  xMoneyCreateOrderResponseDataDto,
+  xMoneyCardResponseDto,
+  OrderDetailsDto,
 } from './typings/dtos';
 import { OrderService } from './services/order.service';
 import { CardService } from './services/card.service';
 import { CommonService } from './services/common.service';
+import { ThemeEnum } from './typings/enums';
 
 export default class xMoney {
   private commonService: CommonService;
@@ -32,6 +35,19 @@ export default class xMoney {
     return this.orderService.createOrderWithHtml(input);
   }
 
+  public async getWebviewCheckoutHtml(
+    input: OrderInputDto,
+    theme: ThemeEnum = ThemeEnum.Dark,
+    xMoneyCustomerId?: number, // used to display cards
+  ): Promise<string> {
+    let cards = [] as xMoneyCardResponseDto[];
+    if (xMoneyCustomerId) {
+      const cardsResponse = await this.getCards(xMoneyCustomerId);
+      cards = cardsResponse.data ?? [];
+    }
+    return this.orderService.getWebviewCheckoutHtml(input, cards, theme);
+  }
+
   public decryptOrderResponse(input: string): xMoneyOrderDecryptResponseDto {
     return this.orderService.decryptOrderResponse(input);
   }
@@ -44,9 +60,13 @@ export default class xMoney {
     return this.cardService.getCards(customerId);
   }
 
+  public getOrder(orderId: string): Promise<ApiResponseDto<OrderDetailsDto>>{
+    return this.orderService.getOrderById(orderId);
+  }
+
   public initializeCheckoutWithSavedCard(
     input: OrderInputSavedCardDto,
-  ): Promise<ApiResponseDto<xMoneyOrderResponseDataDto>> {
+  ): Promise<ApiResponseDto<xMoneyCreateOrderResponseDataDto>> {
     return this.orderService.createOrderWithSavedCard(input);
   }
 }
