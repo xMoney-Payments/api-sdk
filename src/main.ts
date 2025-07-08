@@ -35,7 +35,7 @@ export default class xMoney {
     return this.orderService.createOrderWithHtml(input);
   }
 
-  public async initializeStandaloneCheckoutPage(
+  public async getWebviewCheckoutHtml(
     input: OrderInputDto,
     theme: ThemeEnum = ThemeEnum.Dark,
     xMoneyCustomerId?: number, // used to display cards
@@ -45,7 +45,7 @@ export default class xMoney {
       const cardsResponse = await this.getCards(xMoneyCustomerId);
       cards = cardsResponse.data ?? [];
     }
-    return this.orderService.createOrderWithHtmlPage(input, cards, theme);
+    return this.orderService.getWebviewCheckoutHtml(input, cards, theme);
   }
 
   public decryptOrderResponse(input: string): xMoneyOrderDecryptResponseDto {

@@ -32,23 +32,22 @@ export class xMoneyApiService {
   async createOrder(
     order: OrderInputSavedCardDto,
   ): Promise<xMoneyApiResponseDto<xMoneyCreateOrderResponseDataDto>> {
-    const response = await this.post<string, xMoneyApiResponseDto<xMoneyCreateOrderResponseDataDto>>(
-      'order',
-      qs.stringify(order),
-      {
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
+    const response = await this.post<
+      string,
+      xMoneyApiResponseDto<xMoneyCreateOrderResponseDataDto>
+    >('order', qs.stringify(order), {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
       },
-    );
+    });
     return response.data;
   }
 
-  async getOrdersByExternalId(
+  async getOrderByExternalId(
     externalId: string,
   ): Promise<xMoneyApiResponseDto<xMoneyGetOrderResponseDataDto[]>> {
     const response = await this.get<xMoneyApiResponseDto<xMoneyGetOrderResponseDataDto[]>>(
-    `order?page=0&perPage=1&externalOrderId=${externalId}`
+      `order?page=0&perPage=1&externalOrderId=${externalId}`,
     );
     return response.data;
   }

@@ -1,6 +1,6 @@
 import { ThemeEnum } from "src/typings/enums";
 
-export const createOrderWithHtmlPageString = (publicKey: string, payload: string, checksum: string, cards: string, theme: ThemeEnum) : string => `<!DOCTYPE html>
+export const getWebviewCheckoutHtmlString = (publicKey: string, payload: string, checksum: string, cards: string, theme: ThemeEnum) : string => `<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />

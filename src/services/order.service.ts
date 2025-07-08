@@ -13,7 +13,7 @@ import {
 import { CommonService } from './common.service';
 import { xMoneyApiService } from './xmoney-api.service';
 import { ThemeEnum, xMoneyResponseCodeEnum } from '../typings/enums';
-import { createOrderWithHtmlPageString } from '../utils/create-order-with-html-page';
+import { getWebviewCheckoutHtmlString } from '../utils/get-webview-checkout-html-string';
 
 export class OrderService {
   private commonService: CommonService;
@@ -60,14 +60,14 @@ export class OrderService {
     </script>`;
   }
 
-  public createOrderWithHtmlPage(
+  public getWebviewCheckoutHtml(
     orderInput: OrderInputDto,
     cards: xMoneyCardResponseDto[] = [],
     theme: ThemeEnum,
   ): string {
     const order = this.createOrder(orderInput);
 
-    return createOrderWithHtmlPageString(
+    return getWebviewCheckoutHtmlString(
       orderInput.publicKey,
       order.payload,
       order.checksum,
@@ -79,7 +79,7 @@ export class OrderService {
   public async getOrderById(
     orderId: string,
   ): Promise<ApiResponseDto<xMoneyGetOrderResponseDataDto>> {
-    const orders = await this.apiService.getOrdersByExternalId(orderId);
+    const orders = await this.apiService.getOrderByExternalId(orderId);
     if (!orders?.data?.[0]) {
       throw new Error('Order not found');
     }
