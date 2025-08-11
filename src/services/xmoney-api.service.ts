@@ -6,6 +6,7 @@ import {
   OrderInputSavedCardDto,
   xMoneyCreateOrderResponseDataDto,
   xMoneyGetOrderResponseDataDto,
+  xMoneyGetJwtResponseDataDto,
 } from '../typings/dtos';
 import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { CommonService } from './common.service';
@@ -48,6 +49,14 @@ export class xMoneyApiService {
   ): Promise<xMoneyApiResponseDto<xMoneyGetOrderResponseDataDto[]>> {
     const response = await this.get<xMoneyApiResponseDto<xMoneyGetOrderResponseDataDto[]>>(
       `order?page=0&perPage=1&externalOrderId=${externalId}`,
+    );
+    return response.data;
+  }
+
+  async getJwtToken(
+  ): Promise<xMoneyApiResponseDto<xMoneyGetJwtResponseDataDto>> {
+    const response = await this.get<xMoneyApiResponseDto<xMoneyGetJwtResponseDataDto>>(
+      `auth/jwt-token`,
     );
     return response.data;
   }
