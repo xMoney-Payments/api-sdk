@@ -10,21 +10,25 @@ import {
   xMoneyCreateOrderResponseDataDto,
   xMoneyCardResponseDto,
   OrderDetailsDto,
+  xMoneyGetJwtResponseDataDto,
 } from './typings/dtos';
 import { OrderService } from './services/order.service';
 import { CardService } from './services/card.service';
 import { CommonService } from './services/common.service';
 import { ThemeEnum } from './typings/enums';
+import { AuthService } from './services/auth.service';
 
 export default class xMoney {
   private commonService: CommonService;
   private orderService: OrderService;
   private cardService: CardService;
+  private authService: AuthService;
 
   constructor(initParams: InitInputDto) {
     this.commonService = new CommonService(initParams);
     this.orderService = new OrderService(this.commonService);
     this.cardService = new CardService(this.commonService);
+    this.authService = new AuthService(this.commonService);
   }
 
   public initializeCheckout(input: OrderInputDto): OrderOutputDto {
@@ -62,6 +66,10 @@ export default class xMoney {
 
   public getOrder(orderId: string): Promise<ApiResponseDto<OrderDetailsDto>>{
     return this.orderService.getOrderById(orderId);
+  }
+
+  public getSessionToken(): Promise<ApiResponseDto<xMoneyGetJwtResponseDataDto>> {
+    return this.authService.getSessionToken();
   }
 
   public initializeCheckoutWithSavedCard(

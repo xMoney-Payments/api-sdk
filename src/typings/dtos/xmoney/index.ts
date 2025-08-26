@@ -7,3 +7,4 @@ export * from './xmoney-order';
 export * from './xmoney-card-response.dto';
 export * from './xmoney-api-error.dto';
 export * from './xmoney-get-order-response-data.dto';
+export * from './xmoney-get-jwt-response-data.dto';
