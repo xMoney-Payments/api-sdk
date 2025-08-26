@@ -68,8 +68,8 @@ export default class xMoney {
     return this.orderService.getOrderById(orderId);
   }
 
-  public getJwtToken(): Promise<ApiResponseDto<xMoneyGetJwtResponseDataDto>> {
-    return this.authService.getJwtToken();
+  public getSessionToken(): Promise<ApiResponseDto<xMoneyGetJwtResponseDataDto>> {
+    return this.authService.getSessionToken();
   }
 
   public initializeCheckoutWithSavedCard(

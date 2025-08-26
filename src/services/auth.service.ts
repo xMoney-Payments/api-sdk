@@ -11,8 +11,8 @@ export class AuthService {
     this.xMoneyApiService = new xMoneyApiService(this.commonService);
   }
 
-  public async getJwtToken(): Promise<ApiResponseDto<xMoneyGetJwtResponseDataDto>> {
-    const response = await this.xMoneyApiService.getJwtToken();
+  public async getSessionToken(): Promise<ApiResponseDto<xMoneyGetJwtResponseDataDto>> {
+    const response = await this.xMoneyApiService.getSessionToken();
     return { data: response.data };
   }
 }
