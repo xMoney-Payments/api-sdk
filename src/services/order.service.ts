@@ -64,6 +64,8 @@ export class OrderService {
     orderInput: OrderInputDto,
     cards: xMoneyCardResponseDto[] = [],
     theme: ThemeEnum,
+    sessionToken?: string,
+    userId?: number,
   ): string {
     const order = this.createOrder(orderInput);
 
@@ -73,6 +75,8 @@ export class OrderService {
       order.checksum,
       JSON.stringify(cards),
       theme,
+      sessionToken,
+      userId,
     );
   }
 

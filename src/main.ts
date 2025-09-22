@@ -49,7 +49,15 @@ export default class xMoney {
       const cardsResponse = await this.getCards(xMoneyCustomerId);
       cards = cardsResponse.data ?? [];
     }
-    return this.orderService.getWebviewCheckoutHtml(input, cards, theme);
+    let sessionTokenResponse = await this.authService.getSessionToken();
+    let sessionToken = sessionTokenResponse.data?.token ?? undefined;
+    return this.orderService.getWebviewCheckoutHtml(
+      input,
+      cards,
+      theme,
+      sessionToken,
+      xMoneyCustomerId,
+    );
   }
 
   public decryptOrderResponse(input: string): xMoneyOrderDecryptResponseDto {
@@ -64,7 +72,7 @@ export default class xMoney {
     return this.cardService.getCards(customerId);
   }
 
-  public getOrder(orderId: string): Promise<ApiResponseDto<OrderDetailsDto>>{
+  public getOrder(orderId: string): Promise<ApiResponseDto<OrderDetailsDto>> {
     return this.orderService.getOrderById(orderId);
   }
 
