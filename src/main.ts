@@ -8,7 +8,6 @@ import {
   SaveCardInputDto,
   xMoneyOrderDecryptResponseDto,
   xMoneyCreateOrderResponseDataDto,
-  xMoneyCardResponseDto,
   OrderDetailsDto,
   xMoneyGetJwtResponseDataDto,
 } from './typings/dtos';
@@ -44,20 +43,9 @@ export default class xMoney {
     theme: ThemeEnum = ThemeEnum.Dark,
     xMoneyCustomerId?: number, // used to display cards
   ): Promise<string> {
-    let cards = [] as xMoneyCardResponseDto[];
-    if (xMoneyCustomerId) {
-      const cardsResponse = await this.getCards(xMoneyCustomerId);
-      cards = cardsResponse.data ?? [];
-    }
     let sessionTokenResponse = await this.authService.getSessionToken();
     let sessionToken = sessionTokenResponse.data?.token ?? undefined;
-    return this.orderService.getWebviewCheckoutHtml(
-      input,
-      cards,
-      theme,
-      sessionToken,
-      xMoneyCustomerId,
-    );
+    return this.orderService.getWebviewCheckoutHtml(input, theme, sessionToken, xMoneyCustomerId);
   }
 
   public decryptOrderResponse(input: string): xMoneyOrderDecryptResponseDto {

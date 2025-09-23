@@ -4,7 +4,6 @@ export const getWebviewCheckoutHtmlString = (
   publicKey: string,
   payload: string,
   checksum: string,
-  cards: string,
   theme: ThemeEnum,
   sessionToken?: string,
   userId?: number,
@@ -42,7 +41,6 @@ export const getWebviewCheckoutHtmlString = (
 
     <script>
       // Simulated props (replace with your real data)
-      const savedCards = JSON.parse('${cards}'); // replace with actual saved cards
       const result = {
         payload: "${payload}",
         checksum: "${checksum}"
