@@ -1,11 +1,18 @@
-import { ThemeEnum } from "src/typings/enums";
+import { ThemeEnum } from 'src/typings/enums';
 
-export const getWebviewCheckoutHtmlString = (publicKey: string, payload: string, checksum: string, cards: string, theme: ThemeEnum) : string => `<!DOCTYPE html>
+export const getWebviewCheckoutHtmlString = (
+  publicKey: string,
+  payload: string,
+  checksum: string,
+  theme: ThemeEnum,
+  sessionToken?: string,
+  userId?: number,
+): string => `<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <title>XMoney Payment Form</title>
-    <script src="https://secure-stage.xmoney.com/sdk/0.0.3/xmoney.js"></script>
+    <script src="https://secure-stage.xmoney.com/sdk/0.0.9/xmoney.js"></script>
     <style>
       .payment-form-container {
         position: relative;
@@ -34,7 +41,6 @@ export const getWebviewCheckoutHtmlString = (publicKey: string, payload: string,
 
     <script>
       // Simulated props (replace with your real data)
-      const savedCards = JSON.parse('${cards}'); // replace with actual saved cards
       const result = {
         payload: "${payload}",
         checksum: "${checksum}"
@@ -49,23 +55,31 @@ export const getWebviewCheckoutHtmlString = (publicKey: string, payload: string,
         }
 
         paymentFormInstance = new window.XMoneyPaymentForm({
-          container: "payment-form-widget",
-          elementsOptions: {
-            appearance: {
-              theme: "${theme}",
+           container: "payment-form-widget",
+           elementsOptions: {
+             appearance: {
+               theme: "${theme}",
+             },
             },
-          },
-          savedCards,
-          checksum: result.checksum,
-          jsonRequest: result.payload,
-          publicKey: "${publicKey}",
-          onReady: () => {
-            document.getElementById("loading-overlay").style.display = "none";
-            document.getElementById("payment-form-widget").style.opacity = "1";
-          },
-          onError: (err) => {
-            console.error("❌ Payment error", err);
-          },
+            options: {
+              enableBackgroundRefresh: true,
+              displayCardHolderName: true,
+            },
+            checksum: result.checksum,
+            payload: result.payload,
+            publicKey: "${publicKey}",
+            sessionToken: "${sessionToken}",
+            userId: "${userId}",
+            onReady: () => setIsReady(true),
+            onError: (err) => console.error("❌ Payment error", err),
+            onReady: () => {
+              document.getElementById("loading-overlay").style.display = "none";
+              document.getElementById("payment-form-widget").style.opacity = "1";
+            },
+            onPaymentComplete: (result) => {
+              setTransactionResult(result);
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            },
         });
       }
 

@@ -4,7 +4,6 @@ import {
   ApiResponseDto,
   OrderInputSavedCardDto,
   OrderOutputDto,
-  xMoneyCardResponseDto,
   xMoneyCreateOrderResponseDataDto,
   xMoneyGetOrderResponseDataDto,
   xMoneyOrder,
@@ -62,8 +61,9 @@ export class OrderService {
 
   public getWebviewCheckoutHtml(
     orderInput: OrderInputDto,
-    cards: xMoneyCardResponseDto[] = [],
     theme: ThemeEnum,
+    sessionToken?: string,
+    userId?: number,
   ): string {
     const order = this.createOrder(orderInput);
 
@@ -71,8 +71,9 @@ export class OrderService {
       orderInput.publicKey,
       order.payload,
       order.checksum,
-      JSON.stringify(cards),
       theme,
+      sessionToken,
+      userId,
     );
   }
 
