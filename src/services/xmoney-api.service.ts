@@ -53,11 +53,9 @@ export class xMoneyApiService {
     return response.data;
   }
 
-  async getSessionToken(
-  ): Promise<xMoneyApiResponseDto<xMoneyGetJwtResponseDataDto>> {
-    const response = await this.get<xMoneyApiResponseDto<xMoneyGetJwtResponseDataDto>>(
-      `auth/jwt-token`,
-    );
+  async getSessionToken(): Promise<xMoneyApiResponseDto<xMoneyGetJwtResponseDataDto>> {
+    const response =
+      await this.get<xMoneyApiResponseDto<xMoneyGetJwtResponseDataDto>>(`auth/session-token`);
     return response.data;
   }
 
