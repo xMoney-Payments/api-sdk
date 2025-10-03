@@ -1,6 +1,6 @@
 export class OrderInputDto {
   publicKey: string;
-  cardTransactionMode: "auth" | "authAndCapture" | "credit";
+  cardTransactionMode: 'auth' | 'authAndCapture' | 'credit' | 'verifyCard';
   invoiceEmail?: string;
   saveCard?: boolean;
   cardId?: number;
@@ -18,7 +18,7 @@ export class OrderInputDto {
   };
   order: {
     orderId: string;
-    type: "purchase" | "recurring" | "managed" | "credit";
+    type: 'purchase' | 'recurring' | 'managed' | 'credit';
     amount: number;
     currency: string;
     description: string;
