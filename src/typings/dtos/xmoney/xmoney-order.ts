@@ -20,5 +20,10 @@ export class xMoneyOrder {
     amount: number;
     currency: string;
     description: string;
+    intervalType?: 'day' | 'month';
+    intervalValue?: string;
+    retryPayment?: string;
+    trialAmount?: number;
+    firstBillDate?: string;
   };
 }
