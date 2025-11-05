@@ -60,6 +60,10 @@ export default class xMoney {
     return this.cardService.getCards(customerId);
   }
 
+  public deleteCard(cardId: number): Promise<ApiResponseDto<unknown>> {
+    return this.cardService.deleteCard(cardId);
+  }
+
   public getOrder(orderId: string): Promise<ApiResponseDto<OrderDetailsDto>> {
     return this.orderService.getOrderById(orderId);
   }
