@@ -30,6 +30,11 @@ export class xMoneyApiService {
     return response.data;
   }
 
+  async deleteCardById(cardId: number): Promise<xMoneyApiResponseDto<unknown>> {
+    const response = await this.delete<xMoneyApiResponseDto<unknown>>(`card/${cardId}`);
+    return response.data;
+  }
+
   async createOrder(
     order: OrderInputSavedCardDto,
   ): Promise<xMoneyApiResponseDto<xMoneyCreateOrderResponseDataDto>> {
@@ -90,6 +95,21 @@ export class xMoneyApiService {
   ): Promise<R> {
     try {
       return await axios.post(url, data, {
+        ...config,
+        ...this.getConfig(),
+      });
+    } catch (error: any) {
+      this.logErrorIfNeeded(error, url);
+      return error?.response;
+    }
+  }
+
+  private async delete<T = never, R = AxiosResponse<T>>(
+    url: string,
+    config?: AxiosRequestConfig,
+  ): Promise<R> {
+    try {
+      return await axios.delete(url, {
         ...config,
         ...this.getConfig(),
       });
