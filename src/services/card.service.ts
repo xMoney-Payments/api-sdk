@@ -3,6 +3,7 @@ import {
   ApiResponseDto,
   OrderOutputDto,
   SaveCardInputDto,
+  xMoneyApiResponseDto,
   xMoneyCardResponseDto,
   xMoneyOrder,
 } from '../typings/dtos';
@@ -41,6 +42,10 @@ export class CardService {
       payload: base64Json,
       checksum: base64Checksum,
     };
+  }
+
+  public async deleteCard(cardId: number): Promise<xMoneyApiResponseDto<unknown>> {
+    return await this.xMoneyApiService.deleteCardById(cardId);
   }
 
   public async getCards(
